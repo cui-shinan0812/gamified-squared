@@ -10,6 +10,11 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] private Button GameLaunchButton;
     [SerializeField] private Button GameSettingsButton;
     [SerializeField] private Button ReturnButton;
+
+    [SerializeField] private Slider MusicVolumeSlider;
+    [SerializeField] private Slider SoundVolumeSlider;
+    [SerializeField] private Slider DifficultyLevelSlider;
+    
     [SerializeField] private GameObject GameLaunchUI;
     [SerializeField] private GameObject GameSettingsUI;
     
@@ -41,6 +46,11 @@ public class MainMenuUI : MonoBehaviour
             GameSettingsUI.SetActive(false);
             GameLaunchUI.SetActive(true);
         });
+        
+        // MusicVolumeSlider.onValueChanged.AddListener(() =>
+        // {
+        //     MusicManager.Instance.ChangeVolume(MusicVolumeSlider.value);
+        // });
         
         // Click quitButton
         // quitButton.onClick.AddListener(Application.Quit);

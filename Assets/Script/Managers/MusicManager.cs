@@ -32,6 +32,16 @@ public class MusicManager : MonoBehaviour {
         PlayerPrefs.SetFloat(PLAYER_PREFS_MUSIC_VOLUME, volume);
         PlayerPrefs.Save();
     }
+    
+    public void ChangeVolume(float volume)
+    {
+        this.volume = volume;
+
+        audioSource.volume = volume;
+        
+        PlayerPrefs.SetFloat(PLAYER_PREFS_MUSIC_VOLUME, volume);
+        PlayerPrefs.Save();
+    }
 
     public float GetVolume() {
         return volume;
