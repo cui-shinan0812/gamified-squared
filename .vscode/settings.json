@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "gamified-squared-unity.sln"
+    "dotnet.defaultSolution": "unity.sln"
 }
