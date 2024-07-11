@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Christina.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,18 +9,13 @@ using UnityEngine.Video;
 
 public class GameSettingsUI : MainMenuUI
 {
-    // name of each item of player preferences
-    private const string PLAYER_PREFS_MUSIC_VOLUME = "MusicVolume";
-    private const string PLAYER_PREFS_SOUND_EFFECTS_VOLUME = "SoundEffectsVolume";
-    private const string PLAYER_PREFS_DIFFICULTY_LEVEL = "DifficultyLevel";
-    private const string PLAYER_PREFS_BACKGROUND_IMAGE_PATH = "BackgroundImagePath";
-    private const string PLAYER_PREFS_BACKGROUND_VIDEO_PATH = "BackgroundVideoPath";
-    private const string PLAYER_PREFS_BACKGROUND_DISPLAY_MODE = "BackgroundDisplayMode";
     
     [Header("Buttons")]
     [SerializeField] private Button ReturnButton;
     [SerializeField] private Button ChangeBackgroundImageButton;
     [SerializeField] private Button ChangeBackgroundVideoButton;
+    [SerializeField] private Button ChangeLogoButton;
+
 
     [Header("Sliders")]
     [SerializeField] private Slider MusicVolumeSlider;
@@ -40,10 +36,16 @@ public class GameSettingsUI : MainMenuUI
     [SerializeField] private Toggle ImageTagToggle;
     [SerializeField] private Toggle VideoTagToggle;
     
+    [Header("Scripts")]
+    [SerializeField] private ToggleSwitch BackgroundDisplayModeToggleSwitch;
+    
     private void Awake() {
         
         ChangeBackgroundImageButton.gameObject.SetActive(true);
         ChangeBackgroundVideoButton.gameObject.SetActive(false);
+
+        BackgroundDisplayModeSwitch.value = PlayerPrefs.GetInt(PLAYER_PREFS_BACKGROUND_DISPLAY_MODE, 0);
+        BackgroundDisplayModeToggleSwitch.setSliderValue();
         
         ReturnButton.onClick.AddListener(() =>
         {

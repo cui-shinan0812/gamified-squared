@@ -10,9 +10,22 @@ using UnityEngine.Video;
 
 public class FileManager : MonoBehaviour
 {
-    [SerializeField] private RawImage rawImage;
+    private const string PLAYER_PREFS_BACKGROUND_IMAGE_PATH = "BackgroundImagePath";
+    private const string PLAYER_PREFS_BACKGROUND_VIDEO_PATH = "BackgroundVideoPath";
+    private const string PLAYER_PREFS_LOGO_IMAGE_PATH = "LogoImagePath";
+    
+    [SerializeField] private RawImage BackgroundRawImage;
+    [SerializeField] private RawImage LogoRawImage;
 
-    public void OpenFileBrowserForImage()
+    
+    public static FileManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    public void OpenFileBrowserForBackgroundImage()
     {
         var bp = new BrowserProperties();
         bp.filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
@@ -21,11 +34,30 @@ public class FileManager : MonoBehaviour
         new FileBrowser().OpenFileBrowser(bp, path =>
         {
             //Load image from local path with UWR
-            StartCoroutine(LoadImage(path));
+            Debug.Log(path);
+            StartCoroutine(LoadImage(path, BackgroundRawImage));
+            PlayerPrefs.SetString(PLAYER_PREFS_BACKGROUND_IMAGE_PATH, path);
+            PlayerPrefs.Save();
         });
     }
     
-    public void OpenFileBrowserForVideos()
+    public void OpenFileBrowserForLogoImage()
+    {
+        var bp = new BrowserProperties();
+        bp.filter = "Image files (*.png) | *.png";
+        bp.filterIndex = 0;
+
+        new FileBrowser().OpenFileBrowser(bp, path =>
+        {
+            //Load image from local path with UWR
+            Debug.Log(path);
+            StartCoroutine(LoadImage(path, LogoRawImage));
+            PlayerPrefs.SetString(PLAYER_PREFS_LOGO_IMAGE_PATH, path);
+            PlayerPrefs.Save();
+        });
+    }
+    
+    public void OpenFileBrowserForBackgroundVideos()
     {
         var bp = new BrowserProperties();
         bp.filter = "Video files (*.mp4) | *.mp4; *.webm; *.mov; *.avi; *.wmv; *.flv";
@@ -34,11 +66,28 @@ public class FileManager : MonoBehaviour
         new FileBrowser().OpenFileBrowser(bp, path =>
         {
             Debug.Log(path);
-            VideoLoader.Instance.setVideoURL(path);
+            setBackgroundVideoPath(path);
+            PlayerPrefs.SetString(PLAYER_PREFS_BACKGROUND_VIDEO_PATH, path);
+            PlayerPrefs.Save();
         });
     }
 
-    IEnumerator LoadImage(string path)
+    public void setBackgroundImagePath(string path)
+    {
+        StartCoroutine(LoadImage(path, BackgroundRawImage));
+    }
+    
+    public void setLogoImagePath(string path)
+    {
+        StartCoroutine(LoadImage(path, LogoRawImage));
+    }
+
+    public void setBackgroundVideoPath(string path)
+    {
+        VideoLoader.Instance.setVideoURL(path);
+    }
+    
+    IEnumerator LoadImage(string path, RawImage rawImage)
     {
         using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(path))
         {

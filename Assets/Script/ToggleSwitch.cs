@@ -73,6 +73,12 @@ namespace Christina.UI
         protected virtual void Awake()
         {
             SetupSliderComponent();
+            
+        }
+
+        public void setSliderValue()
+        {
+            sliderValue = _slider.value;
         }
 
         public void OnPointerClick(PointerEventData eventData)
