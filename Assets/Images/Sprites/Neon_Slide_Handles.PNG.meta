@@ -21,7 +21,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -43,7 +43,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -147,7 +147,91 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: Neon_Slide_Handles_pink_s
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 1494
+        width: 108
+        height: 103
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea687c4989c7ee74786dcc275d46adde
+      internalID: -2093812504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Neon_Slide_Handles_blue_pulse
+      rect:
+        serializedVersion: 2
+        x: 1589
+        y: 1106
+        width: 356
+        height: 300
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 31, y: 12, z: 44, w: 15}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 898dccc8cd941254a87beb7dfdae3298
+      internalID: 316218841
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Neon_Slide_Handles_pink_pulse
+      rect:
+        serializedVersion: 2
+        x: 911
+        y: 758
+        width: 437
+        height: 344
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 85, y: 46, z: 91, w: 49}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4183feb1f5526f14e9cad8c619bb6a3d
+      internalID: 1753455772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Neon_Slide_Handles_pink_m
+      rect:
+        serializedVersion: 2
+        x: 299
+        y: 402
+        width: 212
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 34, y: 32, z: 35, w: 26}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9118d0eb4d6309646a54ff75821ee1e8
+      internalID: -2019857897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -158,7 +242,11 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Neon_Slide_Handles_blue_pulse: 316218841
+      Neon_Slide_Handles_pink_m: -2019857897
+      Neon_Slide_Handles_pink_pulse: 1753455772
+      Neon_Slide_Handles_pink_s: -2093812504
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
