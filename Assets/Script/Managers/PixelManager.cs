@@ -19,6 +19,7 @@ public class PixelManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI colorText;
 
     private string[,] pixels;
+    private int[,] hardwareViewPixels;
     private int width;
     private int height;
     private Color32[] colorPixels;
@@ -49,7 +50,7 @@ public class PixelManager : MonoBehaviour
         }
     }
 
-    public void extractPixel()
+    public void ExtractPixel()
     {
         
         Texture2D texture2D = (Texture2D)rawImage.texture;
@@ -60,18 +61,18 @@ public class PixelManager : MonoBehaviour
     
         Debug.Log(colorPixels.Length);
 
-        convertStartingPixel();
+        ConvertStartingPixel();
         
         pixels = new string[height,width];    
         
-        update2DPixelArray();
+        Update2DPixelArray();
 
-        print2DPixelArray();
+        Print2DPixelArray();
 
         // updateAllPixels();
     }
 
-    private void convertStartingPixel()
+    private void ConvertStartingPixel()
     {
         Color32[] newPixelArray = new Color32[width * height];
 
@@ -111,7 +112,7 @@ public class PixelManager : MonoBehaviour
     //     }
     // }
     
-    public void updateAllPixelsDynamic(Toggle[] dynamicToggles)
+    public void UpdateAllPixelsDynamic(Toggle[] dynamicToggles)
     {
         Debug.Log(height);
         Debug.Log(width);
@@ -121,7 +122,7 @@ public class PixelManager : MonoBehaviour
             {
                 Color32 newColor32 = new Color32(colorPixels[x + width * y].r, colorPixels[x + width * y].g,
                     colorPixels[x + width * y].b, 255);
-                if (hexCodeToColorName(ColorUtility.ToHtmlStringRGBA(newColor32)).Equals("EMPTY"))
+                if (HexCodeToColorName(ColorUtility.ToHtmlStringRGBA(newColor32)).Equals("EMPTY"))
                 {
                     dynamicToggles[x + width * y].GetComponentInChildren<Image>().color = Color.grey;
                 }
@@ -133,7 +134,7 @@ public class PixelManager : MonoBehaviour
         }
     }
 
-    private int hexCodeToColorCode(string colorhexCode)
+    private static int HexCodeToColorCode(string colorhexCode)
     {
         switch (colorhexCode)
         {
@@ -144,12 +145,12 @@ public class PixelManager : MonoBehaviour
             case "FF0000FF":
                 return 3;
             default:
-                return 0;
+                return 4;
             
         }
     }
     
-    private string hexCodeToColorName(string colorhexCode)
+    private static string HexCodeToColorName(string colorhexCode)
     {
         switch (colorhexCode)
         {
@@ -191,7 +192,7 @@ public class PixelManager : MonoBehaviour
                 selectedGridIndex = index;
                 selectedGridColor = ColorUtility.ToHtmlStringRGBA(toggle.GetComponentInChildren<Image>().color);
 
-                colorText.text = hexCodeToColorName(selectedGridColor);           
+                colorText.text = HexCodeToColorName(selectedGridColor);           
             }
         });
     }
@@ -201,7 +202,7 @@ public class PixelManager : MonoBehaviour
         colorText.text = colorName;
         
         Color newColor;
-        print2DPixelArray();
+        Print2DPixelArray();
         if (ColorUtility.TryParseHtmlString("#"+ColorNameToHexCode(colorName), out newColor))
         {
             Debug.Log("Altering..");
@@ -209,12 +210,12 @@ public class PixelManager : MonoBehaviour
                 (byte)(newColor.b * 255), 255);
             colorPixels[selectedGridIndex] = newColor32;
             toggles[selectedGridIndex].GetComponentInChildren<Image>().color = colorPixels[selectedGridIndex];
-            update2DPixelArray();
+            Update2DPixelArray();
         }
-        print2DPixelArray();
+        Print2DPixelArray();
     }
 
-    private void print2DPixelArray()
+    private void Print2DPixelArray()
     {
         for (int y = 0; y < height; y++)
         {
@@ -226,28 +227,47 @@ public class PixelManager : MonoBehaviour
         }
     }
 
-    private void update2DPixelArray()
+    private void Update2DPixelArray()
     {
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
                 pixels[y,x] = ColorUtility.ToHtmlStringRGBA(colorPixels[x + width * y]);
-                if (hexCodeToColorName(pixels[y,x]).Equals("EMPTY"))
+                if (HexCodeToColorName(pixels[y,x]).Equals("EMPTY"))
                 {
                     pixels[y, x] = ColorUtility.ToHtmlStringRGBA(Color.grey);
                 }
             }
         }
+
+        UpdateHardwareViewPixels();
     }
 
-    public int getWidth()
+    private void UpdateHardwareViewPixels()
+    {
+        hardwareViewPixels = new int[height, width];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                hardwareViewPixels[y,x] = HexCodeToColorCode(pixels[y,x]);
+            }
+        }
+    }
+
+    public int GetWidth()
     {
         return width;
     }
     
-    public int getHeight()
+    public int GetHeight()
     {
         return height;
+    }
+
+    public int[,] GetHardwareViewPixel()
+    {
+        return hardwareViewPixels;
     }
 }

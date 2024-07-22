@@ -81,16 +81,13 @@ public class VirtualReceiver : MonoBehaviour
     {
         if (steppedTiles.Length > 0)
         {
-            // if (steppedTiles[0].Length > 0)
-            // {
-            //     for (int y = 0; y < steppedTiles.Length; y++)
-            //     {
-            //         for (int x = 0; x < steppedTiles[y].Length; x++)
-            //         {
-            //             steppedTiles[y][x] = false;
-            //         }
-            //     }
-            // }
+            for (int y = 0; y < steppedTiles.Rank; y++)
+            {
+                for (int x = 0; x < steppedTiles.GetLength(0); x++)
+                {
+                    steppedTiles[y,x] = false;
+                }
+            }
         }
     }
 

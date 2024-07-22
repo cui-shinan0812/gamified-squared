@@ -38,11 +38,11 @@ public class EditorUI : MonoBehaviour
         getArrayButton.onClick.AddListener(() =>
         {
             DestroyAllChildren(dynamicGridSubPanel);
-            PixelManager.Instance.extractPixel();
+            PixelManager.Instance.ExtractPixel();
             setGridPanel();
             if (toggles.Length > 0)
             {
-                PixelManager.Instance.updateAllPixelsDynamic(toggles);
+                PixelManager.Instance.UpdateAllPixelsDynamic(toggles);
             }
         });
         
@@ -83,8 +83,8 @@ public class EditorUI : MonoBehaviour
     
     private void setGridPanel()
     {
-        int width = PixelManager.Instance.getWidth();
-        int height = PixelManager.Instance.getHeight();
+        int width = PixelManager.Instance.GetWidth();
+        int height = PixelManager.Instance.GetHeight();
         
         // dynamicGridSubPanel.GetComponent<FlexibleGridLayout>().
 
