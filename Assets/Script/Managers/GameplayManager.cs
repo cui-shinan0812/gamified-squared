@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
+
 
 public class GameplayManager : MonoBehaviour
 {
@@ -20,7 +22,7 @@ public class GameplayManager : MonoBehaviour
 
     private enum EnumColor
     {
-        GREEN,
+        GREEN, 
         RED,
         BLUE,
         YELLOW,
@@ -31,7 +33,7 @@ public class GameplayManager : MonoBehaviour
     // private float waitingToStartTimer = 1f;
     private float countdownToStartTimer = 3f;
     private float gamePlayingTimer;
-    private float gamePlayingTimerMax = 120f;
+    private float gamePlayingTimerMax = 4f;
     private bool isGamePaused = false;
     
     
@@ -47,29 +49,67 @@ public class GameplayManager : MonoBehaviour
     private float redTileScoreAddModifier = 0f;
     private float blueTileScoreAddModifier = .5f;
     private float yellowTileScoreAddModifier = 0f;
-    private float offTileScoreAddModifier = 0f;
+    // private float offTileScoreAddModifier = 0f;
     
     private float greenTileHPHealModifier = 0f;
     private float redTileHPHealModifier = 0f;
     private float blueTileHPHealModifier = 1f;
     private float yellowTileHPHealModifier = 0f;
-    private float offTileHPHealModifier = 0f;
+    // private float offTileHPHealModifier = 0f;
     
     private float greenTileScoreDeductModifier = 0f;
     private float redTileScoreDeductModifier = 1f;
     private float blueTileScoreDeductModifier = 0f;
     private float yellowTileScoreDeductModifier = 0f;
-    private float offTileScoreDeductModifier = 0f;
+    // private float offTileScoreDeductModifier = 0f;
     
     private float greenTileHPDamageModifier = 0f;
     private float redTileHPDamageModifier = 1f;
     private float blueTileHPDamageModifier = 0f;
     private float yellowTileHPDamageModifier = 0f;
-    private float offTileHPDamageModifier = 0f;
+    // private float offTileHPDamageModifier = 0f;
+    
+    private int previousGameplayTimeNumber;
+
+    
+
+    private int[][] testPixels2D = 
+    {
+        new [] { 0, 1 },
+        new [] { 2, 4 }
+    };
+    
+    private bool[][] testStepped2D = 
+    {
+        new [] { false, false },
+        new [] { false, false }
+    };
+
+    private int[][][] test3DArray;
+
+    private int[][][] pixels3D = new int[4][][];
+    
+
+    // private ArrayList pixels3D = new ArrayList();
+
+   
     
     private void Awake() {
         Instance = this;
+        test3DArray = FileManager.Instance.ReadArrayFile();
+
+
+        playerHP = maxHP;
+        for (int i = 0; i < pixels3D.Length; i++)
+        {
+            pixels3D[i] = new int[2][];
+            for (int j = 0; j < pixels3D[i].Length; j++)
+            {
+                pixels3D[i][j] = new int[2];
+            }
+        }
         
+
         state = State.CountdownToStart;
     }
     
@@ -84,7 +124,6 @@ public class GameplayManager : MonoBehaviour
     
     private void VirtualReceiver_OnSteppingChanged(object sender, EventArgs e)
     {
-        // VirtualReceiver.Instance.displayFrame(new Color32[][]);
         ConcludingSteppingResult(VirtualReceiver.Instance.GetSteppedTiles());
     }
 
@@ -117,6 +156,74 @@ public class GameplayManager : MonoBehaviour
                 break;
             case State.GamePlay:
                 gamePlayingTimer -= Time.deltaTime;
+                
+                int gameplayNumber = Mathf.CeilToInt(gamePlayingTimer);
+
+                if (previousGameplayTimeNumber != gameplayNumber) {
+                    previousGameplayTimeNumber = gameplayNumber;
+                    // VirtualReceiver.Instance.displayFrame(testPixels2D);
+                    Debug.Log("index: " + (int)-(gamePlayingTimer - gamePlayingTimerMax));
+                    if ((int)-(gamePlayingTimer - gamePlayingTimerMax) < test3DArray.Length)
+                    {
+                        VirtualReceiver.Instance.displayFrame(test3DArray[(int)-(gamePlayingTimer - gamePlayingTimerMax)]);
+
+                        Debug.Log("Player HP: " + playerHP);
+                        Debug.Log("Score: " + score);
+                        Debug.Log("Time: " + gameplayNumber);
+                    }
+
+                    // for (int y = 0; y < testPixels2D.Length; y++)
+                    // {
+                    //     for (int x = 0; x < testPixels2D[0].Length; x++)
+                    //     {
+                    //         testPixels2D[y][x] = Random.Range(0, 2);
+                    //         if (Random.Range(0,2) == 0)
+                    //         {
+                    //             testPixels2D[y][x] = 4;
+                    //         }
+                    //     }
+                    // }
+                    // if (gameplayNumber == 4)
+                    // {
+                    //     testStepped2D[0][0] = true;
+                    //     testStepped2D[0][1] = false;
+                    //     testStepped2D[1][0] = false;
+                    //     testStepped2D[1][1] = false;
+                    //     
+                    // }
+                    // if (gameplayNumber == 3)
+                    // {
+                    //     testStepped2D[0][0] = false;
+                    //     testStepped2D[0][1] = true;
+                    //     testStepped2D[1][0] = false;
+                    //     testStepped2D[1][1] = false;
+                    //     
+                    // }
+                    // if (gameplayNumber == 2)
+                    // {
+                    //     testStepped2D[0][0] = false;
+                    //     testStepped2D[0][1] = false;
+                    //     testStepped2D[1][0] = true;
+                    //     testStepped2D[1][1] = false;
+                    //     
+                    // }
+                    // if (gameplayNumber == 1)
+                    // {
+                    //     testStepped2D[0][0] = false;
+                    //     testStepped2D[0][1] = false;
+                    //     testStepped2D[1][0] = false;
+                    //     testStepped2D[1][1] = true;
+                    //     
+                    // }
+                    // if (gameplayNumber == 0)
+                    // {
+                    //     testStepped2D[0][0] = true;
+                    //     testStepped2D[0][1] = true;
+                    //     testStepped2D[1][0] = false;
+                    //     testStepped2D[1][1] = false;
+                    //     
+                    // }
+                }
                 if (gamePlayingTimer < 0f) {
                     state = State.GameOver;
                     OnStateChanged?.Invoke(this, EventArgs.Empty);
@@ -128,72 +235,83 @@ public class GameplayManager : MonoBehaviour
         }
     }
 
-    private void ConcludingSteppingResult(bool[,] steppedTiles)
+    private void ConcludingSteppingResult(bool[][] steppedTiles)
     {
-        int[,] hardwareViewPixels = PixelManager.Instance.GetHardwareViewPixel();
+        int[][] hardwareViewPixels = testPixels2D;
 
-        int height = PixelManager.Instance.GetHeight();
-        int width = PixelManager.Instance.GetWidth();
+        // int height = PixelManager.Instance.GetHeight();
+        // int width = PixelManager.Instance.GetWidth();
 
-        int changingScore = 0;
-        int changingHP = 0;
+        // int changingScore = 0;
+        // int changingHP = 0;
 
-        for (int y = 0; y < height; y++)
+        for (int y = 0; y < hardwareViewPixels.Length; y++)
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < hardwareViewPixels[0].Length; x++)
             {
-                if (steppedTiles[y,x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y,x]) == EnumColor.GREEN)
+                if (steppedTiles[y][x])
+                {
+                    Debug.Log("stepped y,x: " + y + ", " + x);
+                }
+                if (steppedTiles[y][x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y][x]) == EnumColor.GREEN)
                 {
                     // Do something for GREEN tiles
-                    changingScore = Mathf.CeilToInt(scoreToAdd * greenTileScoreAddModifier);
-                    changingHP = Mathf.CeilToInt(HPToHeal * greenTileHPHealModifier);
+                    score += Mathf.CeilToInt(scoreToAdd * greenTileScoreAddModifier);
+                    Debug.Log("Score Added:" + Mathf.CeilToInt(scoreToAdd * greenTileScoreAddModifier));
+                    playerHP += Mathf.CeilToInt(HPToHeal * greenTileHPHealModifier);
                     
-                    changingScore = -Mathf.CeilToInt(scoreToDeduct * greenTileScoreDeductModifier);
-                    changingHP = -Mathf.CeilToInt(HPToDamage * greenTileHPDamageModifier);
+                    score += -Mathf.CeilToInt(scoreToDeduct * greenTileScoreDeductModifier);
+                    playerHP += -Mathf.CeilToInt(HPToDamage * greenTileHPDamageModifier);
+                    Debug.Log("Color Code: " + hardwareViewPixels[y][x]);
                 }
 
-                if (steppedTiles[y,x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y,x]) == EnumColor.RED)
+                if (steppedTiles[y][x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y][x]) == EnumColor.RED)
                 {
                     // Do something for RED tiles
-                    changingScore = Mathf.CeilToInt(scoreToAdd * redTileScoreAddModifier);
-                    changingHP = Mathf.CeilToInt(HPToHeal * redTileHPHealModifier);
+                    score += Mathf.CeilToInt(scoreToAdd * redTileScoreAddModifier);
+                    playerHP += Mathf.CeilToInt(HPToHeal * redTileHPHealModifier);
                     
-                    changingScore = -Mathf.CeilToInt(scoreToDeduct * redTileScoreDeductModifier);
-                    changingHP = -Mathf.CeilToInt(HPToDamage * redTileHPDamageModifier);
+                    score += -Mathf.CeilToInt(scoreToDeduct * redTileScoreDeductModifier);
+                    Debug.Log("Score Deducted:" + Mathf.CeilToInt(scoreToDeduct * redTileScoreDeductModifier));
+                    playerHP += -Mathf.CeilToInt(HPToDamage * redTileHPDamageModifier);
+                    Debug.Log("Color Code: " + hardwareViewPixels[y][x]);
                 }
                 
-                if (steppedTiles[y,x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y,x]) == EnumColor.BLUE)
+                if (steppedTiles[y][x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y][x]) == EnumColor.BLUE)
                 {
                     // Do something for BLUE tiles
-                    changingScore = Mathf.CeilToInt(scoreToAdd * blueTileScoreAddModifier);
-                    changingHP = Mathf.CeilToInt(HPToHeal * blueTileHPHealModifier);
+                    score += Mathf.CeilToInt(scoreToAdd * blueTileScoreAddModifier);
+                    Debug.Log("Score Added:" + Mathf.CeilToInt(scoreToAdd * blueTileScoreAddModifier));
+                    playerHP += Mathf.CeilToInt(HPToHeal * blueTileHPHealModifier);
+                    Debug.Log("HP Healed:" + Mathf.CeilToInt(HPToHeal * blueTileHPHealModifier));
                     
-                    changingScore = -Mathf.CeilToInt(scoreToDeduct * blueTileScoreDeductModifier);
-                    changingHP = -Mathf.CeilToInt(HPToDamage * blueTileHPDamageModifier);
-                }
-                
-                if (steppedTiles[y,x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y,x]) == EnumColor.YELLOW)
-                {
-                    // Do something for BLUE tiles
-                    changingScore = Mathf.CeilToInt(scoreToAdd * yellowTileScoreAddModifier);
-                    changingHP = Mathf.CeilToInt(HPToHeal * yellowTileHPHealModifier);
-                    
-                    changingScore = -Mathf.CeilToInt(scoreToDeduct * yellowTileScoreDeductModifier);
-                    changingHP = -Mathf.CeilToInt(HPToDamage * yellowTileHPDamageModifier);
-                }
-                
-                if (steppedTiles[y,x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y,x]) == EnumColor.OFF)
-                {
-                    // Do something for BLUE tiles
-                    changingScore = Mathf.CeilToInt(scoreToAdd * offTileScoreAddModifier);
-                    changingHP = Mathf.CeilToInt(HPToHeal * offTileHPHealModifier);
-                    
-                    changingScore = -Mathf.CeilToInt(scoreToDeduct * offTileScoreDeductModifier);
-                    changingHP = -Mathf.CeilToInt(HPToDamage * offTileHPDamageModifier);
-                }
+                    score += -Mathf.CeilToInt(scoreToDeduct * blueTileScoreDeductModifier);
+                    playerHP += -Mathf.CeilToInt(HPToDamage * blueTileHPDamageModifier);
+                    Debug.Log("Color Code: " + hardwareViewPixels[y][x]);
 
-                score += changingScore;
-                playerHP += changingHP;
+                }
+                
+                if (steppedTiles[y][x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y][x]) == EnumColor.YELLOW)
+                {
+                    // Do something for YELLOW tiles
+                    score += Mathf.CeilToInt(scoreToAdd * yellowTileScoreAddModifier);
+                    playerHP += Mathf.CeilToInt(HPToHeal * yellowTileHPHealModifier);
+                    
+                    score += -Mathf.CeilToInt(scoreToDeduct * yellowTileScoreDeductModifier);
+                    playerHP += -Mathf.CeilToInt(HPToDamage * yellowTileHPDamageModifier);
+                    Debug.Log("Color Code: " + hardwareViewPixels[y][x]);
+
+                }
+                
+                if (steppedTiles[y][x] && ConvertToGameplayManagerViewPixel(hardwareViewPixels[y][x]) == EnumColor.OFF)
+                {
+                    // Do something for OFF tiles
+                    // score = Mathf.CeilToInt(scoreToAdd * offTileScoreAddModifier);
+                    // playerHP = Mathf.CeilToInt(HPToHeal * offTileHPHealModifier);
+                    //
+                    // score = -Mathf.CeilToInt(scoreToDeduct * offTileScoreDeductModifier);
+                    // playerHP = -Mathf.CeilToInt(HPToDamage * offTileHPDamageModifier);
+                }
                 
                 CheckScore();
                 CheckHP();
@@ -207,6 +325,7 @@ public class GameplayManager : MonoBehaviour
         {
             score = 0;
         }
+        Debug.Log("New Score: " + score);
     }
 
     private void CheckHP()
@@ -220,6 +339,7 @@ public class GameplayManager : MonoBehaviour
         {
             // Do something to end the game
         }
+        Debug.Log("New HP: " + playerHP);
     }
 
     public bool IsCountdownToStartActive() {

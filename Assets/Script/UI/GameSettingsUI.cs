@@ -15,6 +15,7 @@ public class GameSettingsUI : MainMenuUI
     [SerializeField] private Button ChangeBackgroundImageButton;
     [SerializeField] private Button ChangeBackgroundVideoButton;
     [SerializeField] private Button ChangeLogoButton;
+    [SerializeField] private Button GoToEditModeButton;
 
 
     [Header("Sliders")]
@@ -52,6 +53,11 @@ public class GameSettingsUI : MainMenuUI
             SoundManager.Instance.PlayCommonButtonClickedSound();
             gameObject.SetActive(false);
             GameLaunchUI.SetActive(true);
+        });
+        
+        GoToEditModeButton.onClick.AddListener(() =>
+        {
+            Loader.Load(Loader.Scene.EditSceneDynamicGridSize);
         });
         
         // range of volume in PlayerPrefs is float number between 0 ~ 1, when display to user, *100 to make it an integer

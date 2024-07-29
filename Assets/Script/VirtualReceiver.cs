@@ -9,60 +9,78 @@ using Random = UnityEngine.Random;
 public class VirtualReceiver : MonoBehaviour
 {
     public static VirtualReceiver Instance;
-    public event EventHandler OnSteppingChanged;
-    private Color32[,] virtualTiles;
-    private bool[,] steppedTiles;
     
+    private int[][] virtualTiles;
+    private bool[][] steppedTiles;
+
+    public event EventHandler OnSteppingChanged;
     
     // Start is called before the first frame update
     private void Awake()
     {
+        Instance = this;
+        virtualTiles = new[]
+        {
+            new []{4,4}, 
+            new []{4,4}
+        };
+            
+        steppedTiles = new[]
+        {
+            new []{false,false}, 
+            new []{false,false}
+        };
         // virtualTiles = Array.Empty<Color32[]>();
         // steppedTiles = Array.Empty<bool[]>();
-        
+
     }
 
     void Start()
     {
-        GameplayManager.Instance.OnStateChanged += GameplayManager_OnStateChanged;
+        // GameplayManager.Instance.OnStateChanged += GameplayManager_OnStateChanged;
     }
 
-    private void GameplayManager_OnStateChanged(object sender, EventArgs e)
-    {
-        if (GameplayManager.Instance.IsGamePlay())
-        {
-            RandomStepping();
-        }
-    }
+    // private void GameplayManager_OnStateChanged(object sender, EventArgs e)
+    // {
+    //     if (GameplayManager.Instance.IsGamePlay())
+    //     {
+    //         RandomStepping();
+    //     }
+    // }
 
-    // U    pdate is called once per frame
+    // Update is called once per frame
     void Update()
     {
         if (GameplayManager.Instance.IsGamePlay())
         {
-            //invake something to tell UI to give array
+            //invoke something to tell UI to give array
         }
+    }
+
+    public void Init()
+    {
+        
     }
     
     // public bool init(string ConfigType, callback: CallbackFunction) {
     //     
     // }
-    public void displayFrame(Color32[,] frame)
+    public void displayFrame(int[][] frame)
     {
         if (frame.Length > 0)
         {
             virtualTiles = frame;
             int height = frame.Length;
-            // int width = frame[0,0].Length;
-            // int width = 
+            int width = frame[0].Length;
             for (int y = 0; y < height; y++)
             {
-                Debug.Log(y + ". row: " );
-                // for (int x = 0; x < width; x++)
-                // {
-                //     Debug.Log(frame[y][x]);
-                // }
-            }   
+                Debug.Log("Display: " + y + ". row: " );
+                for (int x = 0; x < width; x++)
+                {
+                    Debug.Log("Display: " + frame[y][x]);
+                }
+            }
+            RandomStepping();
         }
     }
 
@@ -73,25 +91,26 @@ public class VirtualReceiver : MonoBehaviour
 
     public void RandomStepping()
     {
-        // steppedTiles[Random.Range(0, steppedTiles.Length),Random.Range(0, steppedTiles[0].Length)] = true;
+        steppedTiles[Random.Range(0, steppedTiles.Length)][Random.Range(0, steppedTiles[0].Length)] = true;
         OnSteppingChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void InitialSteppedTiles()
     {
+        Debug.Log(steppedTiles.Length);
         if (steppedTiles.Length > 0)
         {
-            for (int y = 0; y < steppedTiles.Rank; y++)
+            for (int y = 0; y < steppedTiles.Length; y++)
             {
-                for (int x = 0; x < steppedTiles.GetLength(0); x++)
+                for (int x = 0; x < steppedTiles[0].Length; x++)
                 {
-                    steppedTiles[y,x] = false;
+                    steppedTiles[y][x] = false;
                 }
             }
         }
     }
 
-    public bool[,] GetSteppedTiles()
+    public bool[][] GetSteppedTiles()
     {
         return steppedTiles;
     }
