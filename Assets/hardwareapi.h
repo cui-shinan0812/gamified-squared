@@ -17,7 +17,8 @@ public:
                                 int localPort, int bufferSize);
     void displayFrame(int** input_colorframe);
     void send_broadcast(int targetPort);
-    const bool** getStepped();
+    bool** getStepped();
+    // const bool** getStepped();
     
 
 private:

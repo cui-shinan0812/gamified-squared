@@ -19,7 +19,7 @@ public class GameplayManager : MonoBehaviour
         GamePlay,
         GameOver,
     }
-
+    
     private enum EnumColor
     {
         GREEN, 
