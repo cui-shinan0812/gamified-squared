@@ -11,7 +11,7 @@ public class TestCppReturnValue : MonoBehaviour
     {
         int rows, cols;
         IntPtr arrPtr = GetBoolArray(out rows, out cols);
-        bool[][] arr = new bool[rows][];
+        int[][] arr = new int[rows][];
 
         // Marshal the array of pointers (which point to the arrays of bools)
         IntPtr[] ptrArray = new IntPtr[rows];
@@ -19,7 +19,7 @@ public class TestCppReturnValue : MonoBehaviour
 
         for (int i = 0; i < rows; i++)
         {
-            arr[i] = new bool[cols];
+            arr[i] = new int[cols];
             // Now copy the bool values for each row
             IntPtr rowPtr = ptrArray[i];
             byte[] boolBytes = new byte[cols];
@@ -27,7 +27,7 @@ public class TestCppReturnValue : MonoBehaviour
 
             for (int j = 0; j < cols; j++)
             {
-                arr[i][j] = boolBytes[j] != 0;
+                arr[i][j] = boolBytes[j];
             }
         }
 
