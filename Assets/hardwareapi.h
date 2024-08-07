@@ -16,7 +16,7 @@ public:
     Hardwaredriver(int controller_used, int rows, int cols, int *breakpoints, int num_breakpoints, string targetIP, int targetPort,
                                 int localPort, int bufferSize);
     void displayFrame(int** input_colorframe);
-    void send_broadcast(int targetPort);
+    void send_broadcast(const wchar_t* broadcastIP, int targetPort);
     bool** getStepped();
     // const bool** getStepped();
     
@@ -37,7 +37,7 @@ private:
     void send_controllight_oneframe(const wchar_t* targetIP, int targetPort, int num_of_controller_used, int controller_no,
                                         int** input_colorframe, int rows, int cols);
     void send_endframe(const wchar_t* targetIP, int targetPort, int controller_no);
-    vector<unsigned char> receiveMessage(int localport, int bufferSize);
+    vector<int> receiveBroadcastSignal();
 };
 
 #endif

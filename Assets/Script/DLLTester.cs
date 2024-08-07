@@ -18,6 +18,10 @@ public class DLLTester : MonoBehaviour
     
     [DllImport("libUnityPlugIn", CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr getSensors();
+    
+    // Import the receiveBroadcastSignal function from the DLL
+    [DllImport("libUnityPlugIn")]
+    private static extern IntPtr receiveBroadcastSignal(int BROADCAST_PORT, int BUFFER_SIZE);
 
     [SerializeField] private Button TestInitButton;
     [SerializeField] private Button TestDestroyButton;
@@ -26,9 +30,12 @@ public class DLLTester : MonoBehaviour
 
     private int m = 4;
     private int n = 4;
-    private int numPorts = 4;
-    private int length = 6;
-    private int controller_used = 1;
+    // private int numPorts = 4;
+    // private int length = 6;
+    // private int controller_used = 1;
+
+    private bool isGetSensors;
+    
     // private int[] portsDistribution = new int[] { numPorts };
     // private int[][] configMap = new int[2][]
     // {
@@ -38,7 +45,7 @@ public class DLLTester : MonoBehaviour
 
     private void Awake()
     {
-        ///*
+        isGetSensors = false;
         TestInitButton.onClick.AddListener(() =>
         {
             Debug.Log("Pressed init()");
@@ -86,7 +93,6 @@ public class DLLTester : MonoBehaviour
             destroy();
         });
         
-        //*/
         
         TestDisplayFrameButton.onClick.AddListener(() =>
         {
@@ -193,126 +199,171 @@ public class DLLTester : MonoBehaviour
                 Marshal.FreeHGlobal(rows[i]);
             }
             Marshal.FreeHGlobal(framePtr);
+            
         });
 
         
-        // TestGetSensorsButton.onClick.AddListener(() =>
-        // {
-        //     // Call the getSensors method
-        //     IntPtr sensorsPtr = getSensors();
-        //
-        //     // Assuming the size of the matrix is known (e.g., 2x2 for this example)
-        //     // Convert the IntPtr to a managed bool array
-        //     bool[][] sensorsArray = new bool[m][];
-        //     for (int i = 0; i < m; i++)
-        //     {
-        //         sensorsArray[i] = new bool[n];
-        //         for (int j = 0; j < n; j++)
-        //         {
-        //             // Calculate the pointer offset and read the byte value
-        //             IntPtr bytePtr = IntPtr.Add(sensorsPtr, (i * n + j) * Marshal.SizeOf(typeof(byte)));
-        //             byte byteValue = Marshal.PtrToStructure<byte>(bytePtr);
-        //
-        //             // Convert the byte value to a bool
-        //             sensorsArray[i][j] = byteValue != 0;
-        //         }
-        //     }
-        //
-        //
-        //     // Free the unmanaged memory if necessary
-        //     // (Assuming the unmanaged memory needs to be freed, otherwise skip this step)
-        //     for (int i = 0; i < m; i++)
-        //     {
-        //         IntPtr rowPtr = Marshal.ReadIntPtr(sensorsPtr, i * IntPtr.Size);
-        //         Marshal.FreeHGlobal(rowPtr);
-        //     }
-        //     Marshal.FreeHGlobal(sensorsPtr);
-        //
-        //     // Display the sensors array for testing purposes
-        //     Debug.Log("Dimension: " + sensorsArray.Length + " * " + sensorsArray[0].Length);
-        //     for (int i = 0; i < m; i++)
-        //     {
-        //         for (int j = 0; j < n; j++)
-        //         {
-        //             Debug.Log("sensorsArray: " + sensorsArray[i][j] + " ");
-        //         }
-        //     }
-        //
-        // });
         TestGetSensorsButton.onClick.AddListener(() =>
         {
-            // IntPtr sensorsPtr = getSensors();
-            // bool[,] sensors = new bool[4, 4]; // You need to know the number of rows and columns
-            //
-            // for (int i = 0; i < 4; i++)
+            Debug.Log("Pressed TestSensors");
+            
+            // isGetSensors = isGetSensors == false;
+            // ReceiveBroadcastSignal(8200, 1500);
+            // int broadcastPort = 8200; // Example port number
+            // int bufferSize = 1500; // Example buffer size
+            // List<int> signalData = CallReceiveBroadcastSignal(broadcastPort, bufferSize);
+            // // Process the received signal data as needed
+            // foreach (int data in signalData)
             // {
-            //     for (int j = 0; j < 4; j++)
-            //     {
-            //         // Calculate the offset for each element in the 2D array
-            //         int offset = (i * 4 + j) * sizeof(bool);
-            //         sensors[i, j] = Marshal.ReadByte(sensorsPtr, offset) != 0; // Read each byte and convert it to bool
-            //         Debug.Log("sensors["+i+", "+j+"]: " + Marshal.ReadByte(sensorsPtr, offset));
-            //     }
+            //     Debug.Log("Received data: " + data);
             // }
             
-            const int rows = 4;
-            const int cols = 4;
-            // Call the C++ function to get the dynamic integer array
-            IntPtr ptr = getSensors();
-            // Marshal the returned pointer to a 2D integer array
-            int[][] result = new int[rows][];
-            for (int i = 0; i < rows; i++) {
-                result[i] = new int[cols];
-                Marshal.Copy(Marshal.ReadIntPtr(ptr, i * IntPtr.Size), result[i], 0, cols);
-            }
+            // int broadcastPort = 8200;
+            // int bufferSize = 1500;
+            // GetBroadcastSignal(broadcastPort, bufferSize);
             
-            // Interpret integers as booleans
-            bool[][] boolResult = new bool[rows][];
-            for (int i = 0; i < rows; i++) {
-                boolResult[i] = new bool[cols];
-                for (int j = 0; j < cols; j++) 
-                {
-                    boolResult[i][j] = result[i][j] != 0; // Convert non-zero values to true
-                }
-            }
-            // Output the boolean values
-            for (int y = 0; y < boolResult.Length; y++)
-            {
-                for (int x = 0; x < boolResult[0].Length; x++)
-                {
-                    Debug.Log("boolResult[" + y + "][" + x + "]: " + boolResult[y][x]);
-                }
-            }
-            // Clean up the memory allocated in C++
-            for (int i = 0; i < rows; i++) {
-                Marshal.FreeCoTaskMem(Marshal.ReadIntPtr(ptr, i * IntPtr.Size));
-            }
-            Marshal.FreeCoTaskMem(ptr);
-            
+            // GetSensors();
         });
         
         
 
     }
-    
-    public static bool[,] GetSensors()
+
+    private void Update()
     {
-        IntPtr sensorsPtr = getSensors();
-        int M = 4; // Replace with actual value
-        int N = 4; // Replace with actual value
-        bool[,] sensors = new bool[M, N];
-        for (int i = 0; i < M; i++)
+        if (isGetSensors)
         {
-            IntPtr rowPtr = Marshal.ReadIntPtr(sensorsPtr, i * IntPtr.Size);
-            for (int j = 0; j < N; j++)
-            {
-                sensors[i, j] = Marshal.ReadByte(rowPtr, j) != 0;
-                Debug.Log("sensors["+i+", "+j+"]: " + sensors[i, j]);
-            }
+            GetSensors();
         }
-        // Free the unmanaged memory
-        // freeSensors(sensorsPtr, M);
-        return sensors;
+    }
+
+    private void DisplayTestArray(int[][] targetArray)
+    {
+        string testDisplayMap;
+
+        if (targetArray.Length > 0)
+        {
+            Debug.Log("--------------- \n");
+            for (int y = 0; y < targetArray.Length; y++)
+            {
+                testDisplayMap = "";
+                testDisplayMap += "[";
+                for (int x = 0; x < targetArray[0].Length; x++)
+                {
+                    testDisplayMap += " " + targetArray[y][x];
+                }
+
+                if (y < targetArray.Length - 1)
+                {
+                    testDisplayMap += " ], \n";
+                }
+                else
+                {
+                    testDisplayMap += " ] \n";
+                }
+                Debug.Log(testDisplayMap);
+            }
+
+            Debug.Log("--------------- \n");
+        }
     }
     
+    private void GetSensors()
+    {
+        const int sRows = 4;
+        const int sCols = 4;
+        IntPtr arrPtr = getSensors();
+        int[][] arr = new int[sRows][];
+
+        // Marshal the array of pointers (which point to the arrays of bools)
+        IntPtr[] ptrArray = new IntPtr[sRows];
+        Marshal.Copy(arrPtr, ptrArray, 0, sRows);
+
+        for (int i = 0; i < sRows; i++)
+        {
+            arr[i] = new int[sCols];
+            // Now copy the bool values for each row
+            IntPtr rowPtr = ptrArray[i];
+            byte[] boolBytes = new byte[sCols];
+            Marshal.Copy(rowPtr, boolBytes, 0, sCols);
+
+            for (int j = 0; j < sCols; j++)
+            {
+                arr[i][j] = boolBytes[j];
+                // Debug.Log("arr["+ i +"]["+j+"]: " + arr[i][j]);
+            }
+        }
+        DisplayTestArray(arr);
+    }
+
+    public static List<int> ReceiveBroadcastSignal(int broadcastPort, int bufferSize)
+    {
+        IntPtr signalDataPtr = receiveBroadcastSignal(broadcastPort, bufferSize);
+        if (signalDataPtr == IntPtr.Zero)
+            return new List<int>();
+        List<int> signalData = new List<int>();
+        unsafe
+        {
+            int* dataPtr = (int*)signalDataPtr;
+            int size = *dataPtr++;
+            for (int i = 0; i < size; i++)
+            {
+                signalData.Add(*dataPtr++);
+            }
+        }
+        Marshal.FreeHGlobal(signalDataPtr);
+        return signalData;
+    }
+    
+    // Define a helper method to convert IntPtr to List<int>
+    private static List<int> MarshalIntPtrToList(IntPtr ptr, int count)
+    {
+        List<int> list = new List<int>();
+        for (int i = 0; i < count; i++)
+        {
+            list.Add(Marshal.ReadInt32(ptr, i * sizeof(int)));
+        }
+        return list;
+    }
+    
+    // Call the native function and convert the returned IntPtr to List<int>
+    public List<int> CallReceiveBroadcastSignal(int broadcastPort, int bufferSize)
+    {
+        IntPtr ptr = receiveBroadcastSignal(broadcastPort, bufferSize);
+        List<int> signalData = MarshalIntPtrToList(ptr, bufferSize);
+        // Free the allocated memory in the native code
+        Marshal.FreeCoTaskMem(ptr);
+        return signalData;
+    }
+    
+    // Function to convert the received signal data from IntPtr to a List<int>
+    private List<int> ConvertSignalData(IntPtr signalDataPtr, int length)
+    {
+        List<int> signalData = new List<int>();
+        for (int i = 0; i < length; i++)
+        {
+            int value = Marshal.ReadInt32(signalDataPtr, i * sizeof(int));
+            signalData.Add(value);
+        }
+        return signalData;
+    }
+    
+    // Function to call the receiveBroadcastSignal and process the data
+    public void GetBroadcastSignal(int broadcastPort, int bufferSize)
+    {
+        IntPtr signalDataPtr = receiveBroadcastSignal(broadcastPort, bufferSize);
+        if (signalDataPtr == IntPtr.Zero)
+        {
+            Debug.LogError("Failed to receive broadcast signal.");
+            return;
+        }
+        // Assuming the length of the signal data is known or can be determined
+        int length = bufferSize / sizeof(int); // Example calculation
+        List<int> signalData = ConvertSignalData(signalDataPtr, length);
+        // Process the received signal data
+        foreach (int data in signalData)
+        {
+            Debug.Log("Received Signal Data: " + data);
+        }
+    }
 }

@@ -7,6 +7,8 @@ using Random = UnityEngine.Random;
 
 public class GameplayPathMemManager : MonoBehaviour
 {
+    public static GameplayPathMemManager Instance { get; private set; }
+    
     private int[][][] answerMap;
     private int[][] playerViewMap;
     private bool[][] steppedMap;
@@ -41,43 +43,48 @@ public class GameplayPathMemManager : MonoBehaviour
     private float countdownToStartTimer = 3f;
     private float gamePlayingTimer;
     private float gamePlayingTimerMax = 10f;
-    private bool isGamePaused = false;
+    // private bool isGamePaused = false;
 
 
-    private int maxHP = 100;
-    private int playerHP;
-    private int HPToHeal = 15;
-    private int HPToDamage = 20;
-    private int score;
-    private int scoreToAdd = 100;
-    private int scoreToDeduct = 50;
+    // private int maxHP = 100;
+    // private int playerHP;
+    // private int HPToHeal = 15;
+    // private int HPToDamage = 20;
+    // private int score;
+    // private int scoreToAdd = 100;
+    // private int scoreToDeduct = 50;
 
-    private float greenTileScoreAddModifier = 1f;
-    private float redTileScoreAddModifier = 0f;
-    private float blueTileScoreAddModifier = .5f;
-    private float yellowTileScoreAddModifier = 0f;
+    // private float greenTileScoreAddModifier = 1f;
+    // private float redTileScoreAddModifier = 0f;
+    // private float blueTileScoreAddModifier = .5f;
+    // private float yellowTileScoreAddModifier = 0f;
     // private float offTileScoreAddModifier = 0f;
 
-    private float greenTileHPHealModifier = 0f;
-    private float redTileHPHealModifier = 0f;
-    private float blueTileHPHealModifier = 1f;
-    private float yellowTileHPHealModifier = 0f;
+    // private float greenTileHPHealModifier = 0f;
+    // private float redTileHPHealModifier = 0f;
+    // private float blueTileHPHealModifier = 1f;
+    // private float yellowTileHPHealModifier = 0f;
     // private float offTileHPHealModifier = 0f;
 
-    private float greenTileScoreDeductModifier = 0f;
-    private float redTileScoreDeductModifier = 1f;
-    private float blueTileScoreDeductModifier = 0f;
-    private float yellowTileScoreDeductModifier = 0f;
+    // private float greenTileScoreDeductModifier = 0f;
+    // private float redTileScoreDeductModifier = 1f;
+    // private float blueTileScoreDeductModifier = 0f;
+    // private float yellowTileScoreDeductModifier = 0f;
     // private float offTileScoreDeductModifier = 0f;
 
-    private float greenTileHPDamageModifier = 0f;
-    private float redTileHPDamageModifier = 1f;
-    private float blueTileHPDamageModifier = 0f;
-    private float yellowTileHPDamageModifier = 0f;
+    // private float greenTileHPDamageModifier = 0f;
+    // private float redTileHPDamageModifier = 1f;
+    // private float blueTileHPDamageModifier = 0f;
+    // private float yellowTileHPDamageModifier = 0f;
     // private float offTileHPDamageModifier = 0f;
 
     private int previousGameplayTimeNumber;
     private int previousCountdownNumber;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -351,5 +358,17 @@ public class GameplayPathMemManager : MonoBehaviour
             default:
                 return EnumColor.OFF;
         }
+    }
+    
+    public float GetGamePlayingTimerNormalized() {
+        return gamePlayingTimer / gamePlayingTimerMax;
+    }
+    
+    public bool IsCountdownToStartActive() {
+        return state == State.CountdownToStart;
+    }
+    
+    public float GetCountdownToStartTimer() {
+        return countdownToStartTimer;
     }
 }

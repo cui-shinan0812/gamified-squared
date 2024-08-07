@@ -17,4 +17,25 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/EditSceneDynamicGridSize.unity
     guid: 0b8c44b0ee493da48b9c02efcbbea7b5
+  - enabled: 1
+    path: Assets/Scenes/About.unity
+    guid: 280bc514cfcdf9b44a9c40b4b41e8bc5
+  - enabled: 1
+    path: Assets/Scenes/Floor.unity
+    guid: ae5c28c74074db846bb0868c588a39e7
+  - enabled: 1
+    path: Assets/Scenes/Maps.unity
+    guid: b9061ca9332fcac4eab7989b5c37910f
+  - enabled: 1
+    path: Assets/Scenes/Mode.unity
+    guid: fc1ef6b7130562943ac40ac1c37cc450
+  - enabled: 1
+    path: Assets/Scenes/Rule.unity
+    guid: 15af6163404b63a49bb52aacacef67e7
+  - enabled: 1
+    path: Assets/Scenes/Settings.unity
+    guid: dbf4470e1ba9bce479d42d7bf0c44875
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 6b35b3ccb320bea41b38932cc40ee543
   m_configObjects: {}
