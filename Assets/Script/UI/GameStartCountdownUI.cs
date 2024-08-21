@@ -14,21 +14,22 @@ public class GameStartCountdownUI : MonoBehaviour {
     private Animator animator;
     private int previousCountdownNumber;
 
-    private void Awake() {
+    private void Awake()
+    {
         animator = GetComponent<Animator>();
     }
 
     private void Start() {
-        GameplayPathMemManager.Instance.OnStateChanged += GameManager_OnStateChanged;
-        
+        GameplayPathMemManager.Instance.OnStateChanged += GameplayPathMemManager_OnStateChanged;
 
-        // Hide();
+        Hide();
     }
 
-    private void GameManager_OnStateChanged(object sender, EventArgs e) {
+    private void GameplayPathMemManager_OnStateChanged(object sender, EventArgs e) {
         if (GameplayPathMemManager.Instance.IsCountdownToStartActive()) {
             Show();
         } else {
+            // animator.ResetTrigger(NUMBER_POPUP);
             Hide();
         }
     }
@@ -41,7 +42,10 @@ public class GameStartCountdownUI : MonoBehaviour {
 
         if (previousCountdownNumber != countdownNumber) {
             previousCountdownNumber = countdownNumber;
-            animator.SetTrigger(NUMBER_POPUP);
+            if (GameplayPathMemManager.Instance.IsCountdownToStartActive())
+            {
+                animator.SetTrigger(NUMBER_POPUP);
+            }
             // SoundManager.Instance.PlayCountdownSound();
         }
     }

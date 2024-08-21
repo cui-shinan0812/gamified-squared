@@ -1,30 +1,24 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
-public class ReceiveServer : MonoBehaviour
+using UnityEngine;
+
+public class UDPManager : MonoBehaviour
 {
     public bool isDisplayFrame;
-    public static ReceiveServer Instance;
+    public static UDPManager Instance { private set; get; }
     private int M = 4;
     private int N = 4;
     private int numOfPorts = 4;
-    private int maxLength = 4;
-    private int[] portsDistribution;
-    private int[] breakpointsLength;
-    private string[,] distribution = new string[4, 4]
-    {
-        { "A0", "B0", "C0", "D0" },
-        { "A1", "B1", "C1", "D1" },
-        { "A2", "B2", "C2", "C5" },
-        { "A3", "A4", "C3", "C4" }
-    };
+    private int maxLength = 6;
     private int port = 8200;
     private UdpClient server;
     private string message;
+    private bool[][] tempStepMap;
     
     // Define the signature of the function in the C++ DLL
     [DllImport("libUnityPlugIn", CallingConvention = CallingConvention.Cdecl)]
@@ -37,25 +31,11 @@ public class ReceiveServer : MonoBehaviour
         message = "";
         Instance = this;
         isDisplayFrame = false;
-        portsDistribution = new int[1] { numOfPorts };
-        breakpointsLength = new int[1] { numOfPorts };
         
         // Create the UDP server
         server = new UdpClient(port);
         server.BeginReceive(ReceiveCallback, server);
-        Debug.Log("Server started on port: " + port);
-    }
-
-    private void Update()
-    {
-        if (!message.Equals(""))
-        {
-            // bool[][] hardwareMatrix = ReceiveServer.PassMessageToCpp(message);
-            // Debug.Log("----------------\n");
-            // DisplayAnswerViewMap(hardwareMatrix);
-            // Debug.Log("----------------\n");
-            // message = "";
-        }
+        Debug.Log("[UDPManager] Server started on port: " + port);
     }
 
     void ReceiveCallback(IAsyncResult result)
@@ -76,21 +56,6 @@ public class ReceiveServer : MonoBehaviour
 
         // Start listening for the next message
         server.BeginReceive(ReceiveCallback, server);
-
-        // Convert byte array to hexadecimal string
-        // StringBuilder hex = new StringBuilder(data.Length * 2);
-        // foreach (byte b in data)
-        //     hex.AppendFormat("{0:x2}", b);
-        // message = hex.ToString(); // Replace this with the actual message
-        // // Debug.Log("HI1");
-        // bool[][] hardwareMatrix = PassMessageToCpp(message);
-        // Debug.Log("----------------\n");
-        // DisplayAnswerViewMap(hardwareMatrix);
-        // Debug.Log("----------------\n");
-        // message = "";
-        // // Debug.Log("Received message: " + message);
-        // // Start listening for the next message
-        // server.BeginReceive(ReceiveCallback, server);
     }
     
     public static bool[][] PassMessageToCpp(string message)
@@ -139,9 +104,9 @@ public class ReceiveServer : MonoBehaviour
     private void ConvertTo2DBoolAry(byte[] data)
     {
         int maxCols = numOfPorts; // 4
-        Debug.Log("maxCols: " + maxCols);
+        Debug.Log("[UDPManager] maxCols: " + maxCols);
         int maxRows = maxLength; // 6 
-        Debug.Log("maxRows: " + maxRows);
+        Debug.Log("[UDPManager] maxRows: " + maxRows);
         int numOfControllersUsed = 1;
         bool[][] receivedData = new bool[maxCols][];
         for (int i = 0; i < maxCols; i++)
@@ -158,7 +123,7 @@ public class ReceiveServer : MonoBehaviour
             List<int> receivedMessage = new List<int>(Array.ConvertAll(data, Convert.ToInt32));
             int receiverNo = receivedMessage[1];
             receivedMessage.RemoveRange(0, 3);
-            string msg = "";
+            string msg = "[UDPManager] ";
             List<int> abIndex = new List<int>();
             for (int j = 0; j < receivedMessage.Count; j++)
             {
@@ -172,43 +137,10 @@ public class ReceiveServer : MonoBehaviour
             
             
             
-            Debug.Log("receivedMessage: \n"+msg);
+            Debug.Log("[UDPManager] receivedMessage: \n"+msg);
             
-            // for (int j = 0; j < breakpointsLength[i]; j++)
-            // {
-            //     for (int k = 0; k < maxRows; k++)
-            //     {
-            //         int receivedMessageNo = j * 170 + k + 1;
-            //         
-            //         // 00 (170) 01 (170) 02 (170) 03 (170)
-            //         if (receivedMessage[receivedMessageNo] == 0xab)
-            //         {
-            //             receivedData[j][k + 4 * receiverNo] = true;
-            //         }
-            //         else
-            //         {
-            //             receivedData[j][k + 4 * receiverNo] = false;
-            //         }
-            //     }
-            // }
-            //
-            Debug.Log("receivedData.Length: "+ receivedData.Length);
-            Debug.Log("receivedData[0].Length: "+ receivedData[0].Length);
-            // for (int y = 0; y < receivedData.Length; y++) // 6
-            // {
-            //     for (int x = 0; x < receivedData[0].Length; x++) // 4
-            //     {
-            //         int receivedMessageNo = y * 170 + x + 1;
-            //         if (receivedMessage[receivedMessageNo] == 0xab)
-            //         {
-            //             receivedData[y + (x + 4 * receiverNo)][y] = true;
-            //         }
-            //         else
-            //         {
-            //             receivedData[y][x + 4 * receiverNo] = false;
-            //         }
-            //     }
-            // }
+            Debug.Log("[UDPManager] receivedData.Length: "+ receivedData.Length);
+            Debug.Log("[UDPManager] receivedData[0].Length: "+ receivedData[0].Length);
 
             for (int x = 0; x < receivedData[0].Length; x++)
             {
@@ -223,7 +155,6 @@ public class ReceiveServer : MonoBehaviour
                     {
                         receivedData[y][x + 4 * receiverNo] = false;
                     }
-                    // Debug.Log("receivedData[" + y + "][" + x + "] = " + receivedData[y][x]);
                 }
             }
         }
@@ -238,27 +169,13 @@ public class ReceiveServer : MonoBehaviour
             }
         }
 
-        // testReceivedData[0][3] = false;
-
-        // Set [0][0] and [0][1] to 1
-        // testReceivedData[0][0] = true;
-        // testReceivedData[0][1] = true;
-
         bool[][] reversedData = ReverseRowsAndCols(receivedData);
 
         PassToCppProcess(reversedData);
-        // Print the final output of receivedData
-        // for (int i = 0; i < maxRows; i++)
-        // {
-        //     for (int j = 0; j < maxCols; j++)
-        //     {
-        //         Debug.Log("receivedData[" + i + "][" + j + "] = " + receivedData[i][j]);
-        //     }
-        // }
 
-        Debug.Log("[reversedData]----------------\n");
+        Debug.Log("[UDPManager] [reversedData]----------------\n");
         DisplayAnswerViewMap(reversedData);
-        Debug.Log("[reversedData]----------------\n");
+        Debug.Log("[UDPManager] [reversedData]----------------\n");
     }
 
     
@@ -270,7 +187,7 @@ public class ReceiveServer : MonoBehaviour
         {
             for (int y = 0; y < map.Length; y++)
             {
-                testDisplayMap = "";
+                testDisplayMap = "[UDPManager] ";
                 testDisplayMap += "[";
                 for (int x = 0; x < map[0].Length; x++)
                 {
@@ -368,18 +285,10 @@ public class ReceiveServer : MonoBehaviour
             }
         }
 
-        // The arr is now a bool[][] which you can use in your managed code
-        // Example: Display the array using Debug.Log
-        // for (int i = 0; i < arr.Length; i++)
-        // {
-        //     for (int j = 0; j < arr[i].Length; j++)
-        //     {
-        //         Debug.Log("arr[" + i + "][" + j + "] = " + arr[i][j]);
-        //     }
-        // }
-        Debug.Log("arr---------------------");
+        tempStepMap = arr;
+        Debug.Log("[UDPManager] arr---------------------");
         DisplayAnswerViewMap(arr);
-        Debug.Log("arr---------------------");
+        Debug.Log("[UDPManager] arr---------------------");
     }
     
     private void DisplayTestArray(int[][] targetArray)
@@ -390,7 +299,7 @@ public class ReceiveServer : MonoBehaviour
         {
             for (int y = 0; y < targetArray.Length; y++)
             {
-                testDisplayMap = "";
+                testDisplayMap = "[UDPManager] ";
                 testDisplayMap += "[";
                 for (int x = 0; x < targetArray[0].Length; x++)
                 {
@@ -411,4 +320,8 @@ public class ReceiveServer : MonoBehaviour
         }
     }
 
+    public bool[][] GetTempStepMap()
+    {
+        return tempStepMap;
+    }
 }

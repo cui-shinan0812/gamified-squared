@@ -13,5 +13,5 @@ extern "C" {
 	UNITY_API void init(int m, int n, int numPorts, int length, int controller_used, int* portsDistribution, const char*** configMap);
 	UNITY_API void destroy();
 	UNITY_API void displayFrameUnity(int const* const* frame);
-	UNITY_API bool** getSensors(bool ** hardwareMatrix);
+	UNITY_API int** getSensors(int const* const* hardwareMatrix);
 }

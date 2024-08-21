@@ -22,6 +22,8 @@ public class DLLTester : MonoBehaviour
     // Import the receiveBroadcastSignal function from the DLL
     [DllImport("libUnityPlugIn")]
     private static extern IntPtr receiveBroadcastSignal(int BROADCAST_PORT, int BUFFER_SIZE);
+    
+    
 
     [SerializeField] private Button TestInitButton;
     [SerializeField] private Button TestDestroyButton;
@@ -35,6 +37,7 @@ public class DLLTester : MonoBehaviour
     // private int controller_used = 1;
 
     private bool isGetSensors;
+    private bool isDisplayFrame;
     
     // private int[] portsDistribution = new int[] { numPorts };
     // private int[][] configMap = new int[2][]
@@ -46,6 +49,7 @@ public class DLLTester : MonoBehaviour
     private void Awake()
     {
         isGetSensors = false;
+        isDisplayFrame = false;
         TestInitButton.onClick.AddListener(() =>
         {
             Debug.Log("Pressed init()");
@@ -53,14 +57,15 @@ public class DLLTester : MonoBehaviour
             int M = 4;
             int N = 4;
             int numOfPorts = 4;
-            int maxLength = 6;
-            int[] portsDistribution = new int[1] { numOfPorts };
+            int maxLength = 4;
+            int controllerUsed = 1;
+            int[] portsDistribution = new int[1] { 4 };
             string[,] distribution = new string[4, 4]
             {
                 { "A0", "B0", "C0", "D0" },
                 { "A1", "B1", "C1", "D1" },
-                { "A2", "B2", "C2", "C5" },
-                { "A3", "A4", "C3", "C4" }
+                { "A2", "B2", "C2", "D2" },
+                { "A3", "B3", "C3", "D3" }
             };
             // Create a 2D array of IntPtr to hold the string pointers
             IntPtr[] configMap = new IntPtr[M];
@@ -76,7 +81,7 @@ public class DLLTester : MonoBehaviour
             // Allocate memory for the configMap pointer array
             IntPtr configMapPtr = Marshal.UnsafeAddrOfPinnedArrayElement(configMap, 0);
             // Call the init function
-            init(M, N, numOfPorts, maxLength, 0, portsDistribution, configMapPtr);
+            init(M, N, numOfPorts, maxLength, controllerUsed, portsDistribution, configMapPtr);
             // Free the allocated memory
             for (int i = 0; i < M; ++i)
             {
@@ -162,44 +167,10 @@ public class DLLTester : MonoBehaviour
             //
             // // Free the unmanaged memory
             // // Marshal.FreeHGlobal(frameptrModified);
-            
-            int[,] frame = new int[4, 4]
-            {
-                { 0, 1, 2, 3},
-                { 3, 2, 1, 0 },
-                { 2, 1, 3, 0 },
-                { 3, 1, 2, 0 }
-            };
 
-            // Allocate unmanaged memory for the 2D array
-            IntPtr[] rows = new IntPtr[m];
-            for (int i = 0; i < m; ++i)
-            {
-                // Create a 1D array for the current row
-                int[] row = new int[n];
-                for (int j = 0; j < n; ++j)
-                {
-                    row[j] = frame[i, j];
-                }
+            isDisplayFrame = isDisplayFrame != true;
+            Debug.Log("DisplayFrames: " + isDisplayFrame);
 
-                // Allocate unmanaged memory for the row and copy the row data
-                rows[i] = Marshal.AllocHGlobal(n * sizeof(int));
-                Marshal.Copy(row, 0, rows[i], n);
-            }
-
-            IntPtr framePtr = Marshal.AllocHGlobal(m * IntPtr.Size);
-            Marshal.Copy(rows, 0, framePtr, m);
-
-            // Call the C++ function
-            displayFrameUnity(framePtr);
-
-            // Free the unmanaged memory
-            for (int i = 0; i < m; ++i)
-            {
-                Marshal.FreeHGlobal(rows[i]);
-            }
-            Marshal.FreeHGlobal(framePtr);
-            
         });
 
         
@@ -234,6 +205,11 @@ public class DLLTester : MonoBehaviour
         if (isGetSensors)
         {
             GetSensors();
+        }
+
+        if (isDisplayFrame)
+        {
+            DisplayFrames();
         }
     }
 
@@ -365,5 +341,45 @@ public class DLLTester : MonoBehaviour
         {
             Debug.Log("Received Signal Data: " + data);
         }
+    }
+
+    private void DisplayFrames()
+    {
+        int[,] frame = new int[4, 4]
+        {
+            { 2, 1, 2, 3},
+            { 3, 2, 1, 0 },
+            { 2, 1, 3, 0 },
+            { 3, 1, 2, 0 }
+        };
+
+        // Allocate unmanaged memory for the 2D array
+        IntPtr[] rows = new IntPtr[m];
+        for (int i = 0; i < m; ++i)
+        {
+            // Create a 1D array for the current row
+            int[] row = new int[n];
+            for (int j = 0; j < n; ++j)
+            {
+                row[j] = frame[i, j];
+            }
+
+            // Allocate unmanaged memory for the row and copy the row data
+            rows[i] = Marshal.AllocHGlobal(n * sizeof(int));
+            Marshal.Copy(row, 0, rows[i], n);
+        }
+
+        IntPtr framePtr = Marshal.AllocHGlobal(m * IntPtr.Size);
+        Marshal.Copy(rows, 0, framePtr, m);
+
+        // Call the C++ function
+        displayFrameUnity(framePtr);
+            
+        // Free the unmanaged memory
+        for (int i = 0; i < m; ++i)
+        {
+            Marshal.FreeHGlobal(rows[i]);
+        }
+        Marshal.FreeHGlobal(framePtr);
     }
 }

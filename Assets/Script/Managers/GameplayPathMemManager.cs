@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
@@ -10,13 +13,16 @@ public class GameplayPathMemManager : MonoBehaviour
     public static GameplayPathMemManager Instance { get; private set; }
     
     private int[][][] answerMap;
+    private int[][] answerMapForDisplay;
     private int[][] playerViewMap;
     private bool[][] steppedMap;
-    private int stepCorrectCount;
+    private VirtualLedGridSO[][] colorChangeControlMap;
+    public int stepCorrectCount { get; private set; }
     private int previousStepY;
     private int previousStepX;
-
+    
     public event EventHandler OnStateChanged;
+    public event EventHandler OnScoreChanged;
 
     private enum State
     {
@@ -42,63 +48,34 @@ public class GameplayPathMemManager : MonoBehaviour
     private float countdownToStartTimerMax = 5f;
     private float countdownToStartTimer = 3f;
     private float gamePlayingTimer;
-    private float gamePlayingTimerMax = 10f;
-    // private bool isGamePaused = false;
-
-
-    // private int maxHP = 100;
-    // private int playerHP;
-    // private int HPToHeal = 15;
-    // private int HPToDamage = 20;
-    // private int score;
-    // private int scoreToAdd = 100;
-    // private int scoreToDeduct = 50;
-
-    // private float greenTileScoreAddModifier = 1f;
-    // private float redTileScoreAddModifier = 0f;
-    // private float blueTileScoreAddModifier = .5f;
-    // private float yellowTileScoreAddModifier = 0f;
-    // private float offTileScoreAddModifier = 0f;
-
-    // private float greenTileHPHealModifier = 0f;
-    // private float redTileHPHealModifier = 0f;
-    // private float blueTileHPHealModifier = 1f;
-    // private float yellowTileHPHealModifier = 0f;
-    // private float offTileHPHealModifier = 0f;
-
-    // private float greenTileScoreDeductModifier = 0f;
-    // private float redTileScoreDeductModifier = 1f;
-    // private float blueTileScoreDeductModifier = 0f;
-    // private float yellowTileScoreDeductModifier = 0f;
-    // private float offTileScoreDeductModifier = 0f;
-
-    // private float greenTileHPDamageModifier = 0f;
-    // private float redTileHPDamageModifier = 1f;
-    // private float blueTileHPDamageModifier = 0f;
-    // private float yellowTileHPDamageModifier = 0f;
-    // private float offTileHPDamageModifier = 0f;
+    private float gamePlayingTimerMax = 60f;
 
     private int previousGameplayTimeNumber;
     private int previousCountdownNumber;
+    private int theFrameToDisplay;
+    private int m;
+    private int n;
 
     private void Awake()
     {
         Instance = this;
+        state = State.CountdownToStart;
+        answerMap = FileManager.Instance.ReadArrayFile();
     }
 
     private void Start()
     {
-        answerMap = FileManager.Instance.ReadArrayFile();
-        playerViewMap = new int[answerMap[0].Length][];
-        state = State.CountdownToStart;
+        m = answerMap[theFrameToDisplay].Length;
+        n = answerMap[theFrameToDisplay][0].Length;
+        OnStateChanged?.Invoke(this, EventArgs.Empty);
         gamePlayingTimer = gamePlayingTimerMax;
         countdownToStartTimerMax = answerMap.Length;
         countdownToStartTimer = countdownToStartTimerMax;
         stepCorrectCount = 0;
-        for (int y = 0; y < playerViewMap.Length; y++)
-        {
-            playerViewMap[y] = new int[answerMap[0][0].Length];
-        }
+        theFrameToDisplay = 0;
+
+        InitPlayerViewMap();
+        InitAnswerViewMapForDisplay();
 
         steppedMap = new bool[answerMap[0].Length][];
         
@@ -108,6 +85,17 @@ public class GameplayPathMemManager : MonoBehaviour
             for (int x = 0; x < steppedMap[0].Length; x++)
             {
                 steppedMap[y][x] = false;
+            }
+        }
+
+        colorChangeControlMap = new VirtualLedGridSO[answerMap[0].Length][];
+        
+        for (int y = 0; y < answerMap[0].Length; y++)
+        {
+            colorChangeControlMap[y] = new VirtualLedGridSO[answerMap[0][0].Length];
+            for (int x = 0; x < answerMap[0][0].Length; x++)
+            {
+                colorChangeControlMap[y][x] = new VirtualLedGridSO();
             }
         }
         
@@ -123,6 +111,39 @@ public class GameplayPathMemManager : MonoBehaviour
                 //     state = State.CountdownToStart;
                 //     OnStateChanged?.Invoke(this, EventArgs.Empty);
                 // }
+                if (stepCorrectCount == 0)
+                {
+                    for (int y = 0; y < playerViewMap.Length; y++)
+                    {
+                        for (int x = 0; x < playerViewMap[0].Length; x++)
+                        {
+                            playerViewMap[y][x] = 1;
+                        }
+                    }
+                    DllManager.Instance.DisplayFrame(playerViewMap, m, n);
+                }
+                if (stepCorrectCount > 0 && stepCorrectCount < answerMap.Length)
+                {
+                    for (int y = 0; y < playerViewMap.Length; y++)
+                    {
+                        for (int x = 0; x < playerViewMap[0].Length; x++)
+                        {
+                            playerViewMap[y][x] = 2;
+                        }
+                    }
+                    DllManager.Instance.DisplayFrame(playerViewMap, m, n);
+                }
+                if (stepCorrectCount == answerMap.Length)
+                {
+                    for (int y = 0; y < playerViewMap.Length; y++)
+                    {
+                        for (int x = 0; x < playerViewMap[0].Length; x++)
+                        {
+                            playerViewMap[y][x] = 0;
+                        }
+                    }
+                    DllManager.Instance.DisplayFrame(playerViewMap, m, n);
+                }
                 break;
             case State.CountdownToStart:
                 countdownToStartTimer -= Time.deltaTime;
@@ -131,42 +152,66 @@ public class GameplayPathMemManager : MonoBehaviour
                 if (previousCountdownNumber != countdownNumber)
                 {
                     previousCountdownNumber = countdownNumber;
-                    Debug.Log(countdownNumber);
-                    int theFrameToDisplay = -(countdownNumber - (int)countdownToStartTimerMax);
+                    Debug.Log("[System] Counter Down:" + countdownNumber);
+                    theFrameToDisplay = -(countdownNumber - (int)countdownToStartTimerMax);
                     if (theFrameToDisplay < answerMap.Length)
                     {
+                        for (int y = 0; y < answerMap[theFrameToDisplay].Length; y++)
+                        {
+                            for (int x = 0; x < answerMap[theFrameToDisplay][0].Length; x++)
+                            {
+                                if (ConvertToGameplayManagerViewPixel(answerMap[theFrameToDisplay][y][x]) == EnumColor.BLUE)
+                                {
+                                    answerMapForDisplay[y][x] = 2;
+                                    break;
+                                }
+                            }
+                        }
                         DisplayAnswerViewMap(answerMap[theFrameToDisplay]);
+                        DllManager.Instance.DisplayFrame(answerMap[theFrameToDisplay], m, n);
                     }
                 }
 
                 if (countdownToStartTimer < 0f)
                 {
                     state = State.GamePlay;
+                    // DisplayPlayerViewMap();
+                    DllManager.Instance.DisplayFrame(playerViewMap, m, n);
                     OnStateChanged?.Invoke(this, EventArgs.Empty);
                 }
-
-
                 break;
+            
             case State.GamePlay:
+                // if (gamePlayingTimer == gamePlayingTimerMax)
+                // {
+                //     InitPlayerViewMap();
+                // }
                 gamePlayingTimer -= Time.deltaTime;
 
                 int gameplayNumber = Mathf.CeilToInt(gamePlayingTimer);
+                //DisplayPlayerViewMap();
+                DllManager.Instance.DisplayFrame(playerViewMap, m, n);
+                steppedMap = UDPManager.Instance.GetTempStepMap();
+                ColorChangeTimeControl();
                 if (previousGameplayTimeNumber != gameplayNumber)
                 {
                     if (gamePlayingTimer >= 0)
                     {
-                        if (playerViewMap[previousStepY][previousStepX] == 1)
-                        {
-                            playerViewMap[previousStepY][previousStepX] = 3;
-                        }
-                        RandomStep();
+                        // if (playerViewMap[previousStepY][previousStepX] == 1)
+                        // {
+                        //     playerViewMap[previousStepY][previousStepX] = 3;
+                        // }
+                        // RandomStep();
                         // FixedStep();
-                        SteppingHandle();
-                        DisplayPlayerViewMap();
+                        // if (playerViewMap[previousStepY][previousStepX] == 1)
+                        // {
+                        //     playerViewMap[previousStepY][previousStepX] = 3;
+                        // }
                         Debug.Log("[System] Correct step: " + stepCorrectCount);
                     }
                     previousGameplayTimeNumber = gameplayNumber;
                 }
+                SteppingHandle();
                 
                 if (gamePlayingTimer < 0f)
                 {
@@ -188,6 +233,16 @@ public class GameplayPathMemManager : MonoBehaviour
         }
     }
 
+    public void SetStepMap(bool[][] map)
+    {
+        steppedMap = map;
+    }
+
+    public int[][] GetOneFrameOfAnswerMap(int frameIndex)
+    {
+        return answerMap[frameIndex];
+    }
+    
     private void DisplayPlayerViewMap()
     {
         string testDisplayMap;
@@ -196,7 +251,7 @@ public class GameplayPathMemManager : MonoBehaviour
         {
             for (int y = 0; y < playerViewMap.Length; y++)
             {
-                testDisplayMap = "";
+                testDisplayMap = "[System] ";
                 testDisplayMap += "[";
                 for (int x = 0; x < playerViewMap[0].Length; x++)
                 {
@@ -214,7 +269,7 @@ public class GameplayPathMemManager : MonoBehaviour
                 Debug.Log(testDisplayMap);
             }
 
-            Debug.Log("Time: " + gamePlayingTimer);
+            Debug.Log("[System] Time: " + gamePlayingTimer);
         }
     }
     
@@ -226,7 +281,7 @@ public class GameplayPathMemManager : MonoBehaviour
         {
             for (int y = 0; y < answerMap2D.Length; y++)
             {
-                testDisplayMap = "";
+                testDisplayMap = "[System] ";
                 testDisplayMap += "[";
                 for (int x = 0; x < answerMap2D[0].Length; x++)
                 {
@@ -244,7 +299,7 @@ public class GameplayPathMemManager : MonoBehaviour
                 Debug.Log(testDisplayMap);
             }
 
-            Debug.Log("Time: " + countdownToStartTimer);
+            Debug.Log("[System] Time: " + countdownToStartTimer);
         }
     }
 
@@ -259,37 +314,46 @@ public class GameplayPathMemManager : MonoBehaviour
                     previousStepY = y;
                     previousStepX = x;
                     Debug.Log("[System] stepped y,x: " + y + ", " + x);
-                    Debug.Log("-------------");
+                    Debug.Log("[System] -------------");
                 
                     switch (ConvertToGameplayManagerViewPixel(answerMap[stepCorrectCount][y][x]))
                     {
                         case EnumColor.BLUE:
                             stepCorrectCount += 1;
+                            OnScoreChanged?.Invoke(this, EventArgs.Empty);
                             playerViewMap[y][x] = 2;
                             Debug.Log("[System] Correct Tile!");
                             Debug.Log("[System] previousGameplayTimeNumber: "+ $"{gamePlayingTimer:0.0}");
                             Debug.Log("[System] 1 second is added!");
                             gamePlayingTimer += 1f;
                             Debug.Log("[System] gamePlayingTimer: "+ $"{gamePlayingTimer:0.0}");
-                            DisplayPlayerViewMap();
+                            Debug.Log("[System] Blue!");
+                            //DisplayPlayerViewMap();
+                            Debug.Log("[System] Blue! " + playerViewMap[y][x]);
+                            break;
+                        case EnumColor.OFF:
+                            if (ConvertToGameplayManagerViewPixel(playerViewMap[y][x]) == EnumColor.YELLOW || 
+                                ConvertToGameplayManagerViewPixel(playerViewMap[y][x]) == EnumColor.OFF)
+                            {
+                                playerViewMap[y][x] = 1;
+                                colorChangeControlMap[y][x].InitObject();
+                                Debug.Log("[System] Wrong Tile!");
+                                Debug.Log("[System] previousGameplayTimeNumber: "+ $"{gamePlayingTimer:0.0}");
+                                Debug.Log("[System] 0.5 second is reduced!");
+                                gamePlayingTimer -= .5f;
+                                Debug.Log("[System] gamePlayingTimer: "+ $"{gamePlayingTimer:0.0}");
+                                //DisplayPlayerViewMap();   
+                            }
                             break;
                         default:
-                            playerViewMap[y][x] = 1;
-                            Debug.Log("[System] Wrong Tile!");
-                            Debug.Log("[System] previousGameplayTimeNumber: "+ $"{gamePlayingTimer:0.0}");
-                            Debug.Log("[System] 0.5 second is reduced!");
-                            gamePlayingTimer -= .5f;
-                            Debug.Log("[System] gamePlayingTimer: "+ $"{gamePlayingTimer:0.0}");
-                            DisplayPlayerViewMap();
                             break;
                     }
-                    
-                    Debug.Log("-------------");
-                    ResetSteps();
-                    break;
+                    DllManager.Instance.DisplayFrame(playerViewMap, m, n);
+                    Debug.Log("[System] -------------");
                 }
             }
         }
+        ResetSteps();
     }
 
     private void ConcludeResult()
@@ -359,6 +423,22 @@ public class GameplayPathMemManager : MonoBehaviour
                 return EnumColor.OFF;
         }
     }
+
+    private void ColorChangeTimeControl()
+    {
+        for (int y = 0; y < colorChangeControlMap.Length; y++)
+        {
+            for (int x = 0; x < colorChangeControlMap[0].Length; x++)
+            {
+                colorChangeControlMap[y][x].SetRedToYellowCountDownTime(Time.deltaTime);
+
+                if ( ConvertToGameplayManagerViewPixel(playerViewMap[y][x]) == EnumColor.RED && colorChangeControlMap[y][x].GetRedToYellowCountDownTime() < 0)
+                {
+                    playerViewMap[y][x] = 3;
+                }
+            }
+        }
+    }
     
     public float GetGamePlayingTimerNormalized() {
         return gamePlayingTimer / gamePlayingTimerMax;
@@ -368,7 +448,37 @@ public class GameplayPathMemManager : MonoBehaviour
         return state == State.CountdownToStart;
     }
     
+    public bool IsGameplayActive() {
+        return state == State.GamePlay;
+    }
+    
     public float GetCountdownToStartTimer() {
         return countdownToStartTimer;
+    }
+
+    private void InitPlayerViewMap()
+    {
+        playerViewMap = new int[answerMap[0].Length][];
+        for (int y = 0; y < playerViewMap.Length; y++)
+        {
+            playerViewMap[y] = new int[answerMap[0][0].Length];
+            for (int x = 0; x < playerViewMap[0].Length; x++)
+            {
+                playerViewMap[y][x] = 4;
+            }
+        }
+    }
+    
+    private void InitAnswerViewMapForDisplay()
+    {
+        answerMapForDisplay = new int[answerMap[0].Length][];
+        for (int y = 0; y < answerMapForDisplay.Length; y++)
+        {
+            answerMapForDisplay[y] = new int[answerMap[0][0].Length];
+            for (int x = 0; x < answerMapForDisplay[0].Length; x++)
+            {
+                answerMapForDisplay[y][x] = 4;
+            }
+        }
     }
 }
