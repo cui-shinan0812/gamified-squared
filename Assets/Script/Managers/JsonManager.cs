@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 
+// JsonManager responsible on Json file handling
 public class JsonManager : MonoBehaviour
 {
     public static JsonManager Instance { get; private set; }

@@ -13,8 +13,11 @@ using Newtonsoft.Json;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+
+// FileManager is responsible to any function that require file access like opening file browser
 public class FileManager : MonoBehaviour
 {
+    // const variable to store the player preference name
     public const string PLAYER_PREFS_BACKGROUND_IMAGE_PATH = "BackgroundImagePath";
     public const string PLAYER_PREFS_BACKGROUND_VIDEO_PATH = "BackgroundVideoPath";
     public const string PLAYER_PREFS_LOGO_IMAGE_PATH = "LogoImagePath";
@@ -22,7 +25,6 @@ public class FileManager : MonoBehaviour
     
     [SerializeField] private RawImage BackgroundRawImage;
     [SerializeField] private RawImage LogoRawImage;
-
     
     public static FileManager Instance { get; private set; }
 
@@ -197,21 +199,6 @@ public class FileManager : MonoBehaviour
     
     public void OutputArrayAsFile(int[][][] myJagged3DArray)
     {
-        
-        // for (int d = 0; d < myJagged3DArray.Length; d++)
-        // {
-        //     myJagged3DArray[d] = new int[2][];
-        //     for (int y = 0; y < myJagged3DArray[0].Length; y++)
-        //     {
-        //         myJagged3DArray[d][y] = new int[2];
-        //         for (int x = 0; x < myJagged3DArray[0][0].Length; x++)
-        //         {
-        //             // Assign random value in the range [0, 2]
-        //             myJagged3DArray[d][y][x] = UnityEngine.Random.Range(0, 3);
-        //         }
-        //     }
-        // }
-
         if (myJagged3DArray.Length > 0)
         {
             // Convert to a nested list
@@ -285,39 +272,6 @@ public class FileManager : MonoBehaviour
         }
 
         return myJagged3DArray;
-    }
-
-    
-    public int[][][] ReadAndSaveInto3DArray(string filePath)
-    {
-        var lines = File.ReadAllLines(filePath);
-        var frames = new List<int[][]>();
-        var frame = new List<int[]>();
-        for (int i = 0; i < lines.Length; i++)
-        {
-            if (lines[i].StartsWith("Frame shape"))
-            {
-                if (frame.Count > 0)
-                {
-                    frames.Add(frame.ToArray());
-                    frame.Clear();
-                }
-            }
-            else if (lines[i].StartsWith("[["))
-            {
-                var rows = lines[i].Trim(new char[] { '[', ']' }).Split(new string[] { "], [" }, StringSplitOptions.None);
-                foreach (var row in rows)
-                {
-                    var pixels = row.Split(' ').Select(int.Parse).ToArray();
-                    frame.Add(pixels);
-                }
-            }
-        }
-        if (frame.Count > 0)
-        {
-            frames.Add(frame.ToArray());
-        }
-        return frames.ToArray();
     }
     
     public int[][][] ReadFrameFile(string filePath)

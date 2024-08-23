@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
+// This is used only in Edit page, kinda a test script for extracting json file which has metadata
 public class MetaDataManager : MonoBehaviour
 {
     public static MetaDataManager Instance;

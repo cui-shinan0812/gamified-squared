@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// unused Script feel free to delete
 public class GameplaySettingsManager : MonoBehaviour
 {
     // Start is called before the first frame update

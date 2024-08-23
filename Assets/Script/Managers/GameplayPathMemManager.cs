@@ -8,6 +8,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
+// This Gameplay Manager is created specific for the Path Memorizing game.
+// This Manager responsible on the game logic handling
 public class GameplayPathMemManager : MonoBehaviour
 {
     public static GameplayPathMemManager Instance { get; private set; }
@@ -18,6 +20,8 @@ public class GameplayPathMemManager : MonoBehaviour
     private bool[][] steppedMap;
     private VirtualLedGridSO[][] colorChangeControlMap;
     public int stepCorrectCount { get; private set; }
+    
+    // These 2 are variables used in test stage
     private int previousStepY;
     private int previousStepX;
     
@@ -26,7 +30,6 @@ public class GameplayPathMemManager : MonoBehaviour
 
     private enum State
     {
-        // Essential State for multiplayer mode
         WaitingToStart,
         CountdownToStart,
         GamePlay,
@@ -45,10 +48,10 @@ public class GameplayPathMemManager : MonoBehaviour
     private State state;
 
     // private float waitingToStartTimer = 1f;
-    private float countdownToStartTimerMax = 5f;
-    private float countdownToStartTimer = 3f;
+    private float countdownToStartTimerMax = 5f; // seconds
+    private float countdownToStartTimer = 3f; // seconds
     private float gamePlayingTimer;
-    private float gamePlayingTimerMax = 60f;
+    private float gamePlayingTimerMax = 60f; // seconds
 
     private int previousGameplayTimeNumber;
     private int previousCountdownNumber;
@@ -65,8 +68,11 @@ public class GameplayPathMemManager : MonoBehaviour
 
     private void Start()
     {
+        // height
         m = answerMap[theFrameToDisplay].Length;
+        // width
         n = answerMap[theFrameToDisplay][0].Length;
+        
         OnStateChanged?.Invoke(this, EventArgs.Empty);
         gamePlayingTimer = gamePlayingTimerMax;
         countdownToStartTimerMax = answerMap.Length;
@@ -182,10 +188,6 @@ public class GameplayPathMemManager : MonoBehaviour
                 break;
             
             case State.GamePlay:
-                // if (gamePlayingTimer == gamePlayingTimerMax)
-                // {
-                //     InitPlayerViewMap();
-                // }
                 gamePlayingTimer -= Time.deltaTime;
 
                 int gameplayNumber = Mathf.CeilToInt(gamePlayingTimer);
@@ -197,16 +199,10 @@ public class GameplayPathMemManager : MonoBehaviour
                 {
                     if (gamePlayingTimer >= 0)
                     {
-                        // if (playerViewMap[previousStepY][previousStepX] == 1)
-                        // {
-                        //     playerViewMap[previousStepY][previousStepX] = 3;
-                        // }
+                        // testing method calls. Their function conflict to each others, choose only one to active at a time
                         // RandomStep();
                         // FixedStep();
-                        // if (playerViewMap[previousStepY][previousStepX] == 1)
-                        // {
-                        //     playerViewMap[previousStepY][previousStepX] = 3;
-                        // }
+                        
                         Debug.Log("[System] Correct step: " + stepCorrectCount);
                     }
                     previousGameplayTimeNumber = gameplayNumber;
@@ -232,17 +228,8 @@ public class GameplayPathMemManager : MonoBehaviour
 
         }
     }
-
-    public void SetStepMap(bool[][] map)
-    {
-        steppedMap = map;
-    }
-
-    public int[][] GetOneFrameOfAnswerMap(int frameIndex)
-    {
-        return answerMap[frameIndex];
-    }
     
+    // DisplayPlayerViewMap is for debug and responsible for display the array Player View Map on debug console in Unity
     private void DisplayPlayerViewMap()
     {
         string testDisplayMap;
@@ -273,6 +260,7 @@ public class GameplayPathMemManager : MonoBehaviour
         }
     }
     
+    // Similar to DisplayPlayerViewMap() but this display answer map instead
     private void DisplayAnswerViewMap(int[][] answerMap2D)
     {
         string testDisplayMap;
@@ -303,6 +291,7 @@ public class GameplayPathMemManager : MonoBehaviour
         }
     }
 
+    // judge and decide the behavior and result of the current steps returned from the receiver
     private void SteppingHandle()
     {
         for (int y = 0; y < playerViewMap.Length; y++)
@@ -356,6 +345,7 @@ public class GameplayPathMemManager : MonoBehaviour
         ResetSteps();
     }
 
+    // ConcludeResult() concludes the score of the player when Game over
     private void ConcludeResult()
     {
         if (gamePlayingTimer < 0)
@@ -373,6 +363,7 @@ public class GameplayPathMemManager : MonoBehaviour
         Debug.Log("[System] Your score: " + gameTotalScore);
     }
 
+    // test method for random steps
     private void RandomStep()
     {
         int randomY = Random.Range(0, steppedMap.Length);
@@ -381,6 +372,7 @@ public class GameplayPathMemManager : MonoBehaviour
         steppedMap[randomY][randomX] = true;
     }
 
+    // reset the local steps array to all false
     private void ResetSteps()
     {
         for (int y = 0; y < steppedMap.Length; y++)
@@ -392,6 +384,7 @@ public class GameplayPathMemManager : MonoBehaviour
         }
     }
 
+    // test method for fixed (all correct) steps
     private void FixedStep()
     {
         for (int y = 0; y < answerMap[0].Length; y++)
@@ -424,6 +417,7 @@ public class GameplayPathMemManager : MonoBehaviour
         }
     }
 
+    // Wrong stepping behaviour control
     private void ColorChangeTimeControl()
     {
         for (int y = 0; y < colorChangeControlMap.Length; y++)
@@ -455,7 +449,7 @@ public class GameplayPathMemManager : MonoBehaviour
     public float GetCountdownToStartTimer() {
         return countdownToStartTimer;
     }
-
+    
     private void InitPlayerViewMap()
     {
         playerViewMap = new int[answerMap[0].Length][];
@@ -465,6 +459,7 @@ public class GameplayPathMemManager : MonoBehaviour
             for (int x = 0; x < playerViewMap[0].Length; x++)
             {
                 playerViewMap[y][x] = 4;
+                // 4 means off, no light
             }
         }
     }
@@ -478,6 +473,7 @@ public class GameplayPathMemManager : MonoBehaviour
             for (int x = 0; x < answerMapForDisplay[0].Length; x++)
             {
                 answerMapForDisplay[y][x] = 4;
+                // 4 means off, no light
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+// DllManager is responsible on calling other functions from the dll
 public class DllManager : MonoBehaviour
 {
     public static DllManager Instance { get; private set; }
@@ -15,6 +16,7 @@ public class DllManager : MonoBehaviour
         Instance = this;
     }
 
+    // DisplayFrame() is responsible to pass the 2D array to dll function displayFrameUnity()
     public void DisplayFrame(int[][] map, int m, int n)
     {
 

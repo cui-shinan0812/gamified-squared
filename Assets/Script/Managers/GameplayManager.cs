@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-
+// This is for early test
 public class GameplayManager : MonoBehaviour
 {
     public static GameplayManager Instance { private set; get; }

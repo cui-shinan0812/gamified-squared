@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+// DllInitiater is used to trigger the init() function in the dll, which is responsible to send the config data to the hardware
 public class DllInitiater : MonoBehaviour
 {
     [DllImport("libUnityPlugIn")]
