@@ -45,7 +45,8 @@ public class JsonManager : MonoBehaviour
         PortsDistribution = Array.Empty<int>();
         Distribution = Array.Empty<string[]>();
         // Open file browser
-        string path = EditorUtility.OpenFilePanel("Select JSON file", "", "json");
+        // string path = EditorUtility.OpenFilePanel("Select JSON file", "", "json");
+        string path = "Assets\\Resources\\config.json";
         if (path.Length != 0)
         {
             // Read the JSON file

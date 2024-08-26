@@ -20,6 +20,7 @@ public class GameplayPathMemManager : MonoBehaviour
     private bool[][] steppedMap;
     private VirtualLedGridSO[][] colorChangeControlMap;
     public int stepCorrectCount { get; private set; }
+    private int gameTotalScore;
     
     // These 2 are variables used in test stage
     private int previousStepY;
@@ -193,14 +194,20 @@ public class GameplayPathMemManager : MonoBehaviour
                 int gameplayNumber = Mathf.CeilToInt(gamePlayingTimer);
                 //DisplayPlayerViewMap();
                 DllManager.Instance.DisplayFrame(playerViewMap, m, n);
-                steppedMap = UDPManager.Instance.GetTempStepMap();
+                
+                // VVV comment this when not connect to hardware VVV
+                
+                // steppedMap = UDPManager.Instance.GetTempStepMap();
+                
+                // ^^^ comment this when not connect to hardware ^^^
+                
                 ColorChangeTimeControl();
                 if (previousGameplayTimeNumber != gameplayNumber)
                 {
                     if (gamePlayingTimer >= 0)
                     {
                         // testing method calls. Their function conflict to each others, choose only one to active at a time
-                        // RandomStep();
+                        RandomStep();
                         // FixedStep();
                         
                         Debug.Log("[System] Correct step: " + stepCorrectCount);
@@ -209,21 +216,17 @@ public class GameplayPathMemManager : MonoBehaviour
                 }
                 SteppingHandle();
                 
-                if (gamePlayingTimer < 0f)
+                if (gamePlayingTimer < 0f || stepCorrectCount == answerMap.Length)
                 {
                     state = State.GameOver;
                     OnStateChanged?.Invoke(this, EventArgs.Empty);
-                }
-
-                if (stepCorrectCount == answerMap.Length)
-                {
-                    state = State.GameOver;
                 }
 
                 break;
             case State.GameOver:
                 ConcludeResult();
                 state = State.WaitingToStart;
+                OnStateChanged?.Invoke(this, EventArgs.Empty);
                 break;
 
         }
@@ -356,7 +359,7 @@ public class GameplayPathMemManager : MonoBehaviour
         Debug.Log("[System] Time remain: " + String.Format("{0:0.00}", gamePlayingTimer));
         int correctStepsScore = 100 * stepCorrectCount;
         int timeRemainBonus = 50 * Mathf.CeilToInt(gamePlayingTimer);
-        int gameTotalScore = correctStepsScore + timeRemainBonus;
+        gameTotalScore = correctStepsScore + timeRemainBonus;
         
         Debug.Log("[System] Correct Stepping Score: " + correctStepsScore);
         Debug.Log("[System] Time Remaining Bonus Score: " + timeRemainBonus);
@@ -445,6 +448,11 @@ public class GameplayPathMemManager : MonoBehaviour
     public bool IsGameplayActive() {
         return state == State.GamePlay;
     }
+
+    public bool IsWaitingToStart()
+    {
+        return state == State.WaitingToStart;
+    }
     
     public float GetCountdownToStartTimer() {
         return countdownToStartTimer;
@@ -476,5 +484,20 @@ public class GameplayPathMemManager : MonoBehaviour
                 // 4 means off, no light
             }
         }
+    }
+
+    public int GetGameTotalScore()
+    {
+        return gameTotalScore;
+    }
+
+    public float GetGamePlayingTimer()
+    {
+        return gamePlayingTimer;
+    }
+
+    public int GetStepCorrectCount()
+    {
+        return stepCorrectCount;
     }
 }

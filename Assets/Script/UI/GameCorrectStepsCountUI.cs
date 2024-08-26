@@ -26,19 +26,6 @@ public class GameCorrectStepsCountUI : MonoBehaviour {
         Hide();
     }
 
-    private void Update()
-    {
-        // int countdownNumber = Mathf.CeilToInt(GameplayPathMemManager.Instance.GetCountdownToStartTimer());
-        //
-        // if (previousCountdownNumber != countdownNumber) {
-        //     previousCountdownNumber = countdownNumber;
-        //     if (GameplayPathMemManager.Instance.IsGameplayActive())
-        //     {
-        //         animator.ResetTrigger(NUMBER_POPUP);
-        //     }
-        // }
-    }
-
     private void GameplayPathMemManager_OnStateChanged(object sender, EventArgs e)
     {
         if (GameplayPathMemManager.Instance.IsGameplayActive()) {

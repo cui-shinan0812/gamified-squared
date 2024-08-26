@@ -242,7 +242,8 @@ public class FileManager : MonoBehaviour
         int[][][] myJagged3DArray = new int[][][] { };
 
         // Open file browser
-        string path = EditorUtility.OpenFilePanel("Select JSON file", "", "json");
+        // string path = EditorUtility.OpenFilePanel("Select JSON file", "", "json");
+        string path = "Assets\\Resources\\testPathMemMap.json";
         if (path.Length != 0)
         {
             // Read the JSON file content

@@ -21,8 +21,6 @@ public class GameStartCountdownUI : MonoBehaviour {
 
     private void Start() {
         GameplayPathMemManager.Instance.OnStateChanged += GameplayPathMemManager_OnStateChanged;
-
-        Hide();
     }
 
     private void GameplayPathMemManager_OnStateChanged(object sender, EventArgs e) {
