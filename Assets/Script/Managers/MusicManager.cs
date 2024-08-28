@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// MusicManager is responsible to the volume control of any music. Only background music for this project.
 public class MusicManager : MonoBehaviour {
 
     private const string PLAYER_PREFS_MUSIC_VOLUME = "MusicVolume";

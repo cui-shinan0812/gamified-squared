@@ -28,7 +28,6 @@ public class ScoreBoardUI : MonoBehaviour
     private void GameplayPathMemManager_OnStateChanged(object sender, EventArgs e)
     {
         if (GameplayPathMemManager.Instance.IsWaitingToStart()) {
-            Debug.Log("GameplayPathMemManager_OnStateChanged Show");
             Show();
         } else {
             Hide();
@@ -45,16 +44,19 @@ public class ScoreBoardUI : MonoBehaviour
         if (totalScore >= 1000 || GameplayPathMemManager.Instance.GetStepCorrectCount() > 0)
         {
             starMiddle.gameObject.SetActive(true);
+            // display the 1st star
         }
         
         if (totalScore >= 2000)
         {
             starLeft.gameObject.SetActive(true);
+            // display the 2nd star
         }
         
         if (totalScore >= 3000)
         {
             starRight.gameObject.SetActive(true);
+            // display the 3rd star
         }
     }
 

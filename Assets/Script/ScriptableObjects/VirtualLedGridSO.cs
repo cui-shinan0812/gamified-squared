@@ -4,9 +4,8 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 public class VirtualLedGridSO {
-    
-    public float redToYellowCountDownTimeMax;
-    public float redToYellowCountDownTime;
+    private float redToYellowCountDownTimeMax;
+    private float redToYellowCountDownTime;
 
     public VirtualLedGridSO()
     {
@@ -32,7 +31,7 @@ public class VirtualLedGridSO {
         return redToYellowCountDownTime;
     }
 
-    public int GetRedToYellowCountDownTimeNormalized()
+    public int GetRedToYellowCountDownTimeCeilToInt()
     {
         return Mathf.CeilToInt(redToYellowCountDownTime);
     }

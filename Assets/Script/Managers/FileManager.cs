@@ -220,15 +220,15 @@ public class FileManager : MonoBehaviour
             string json = JsonConvert.SerializeObject(nestedList);
 
             // Open a file browser for the user to choose where to save the file
-            string path = UnityEditor.EditorUtility.SaveFilePanel(
-                "Save JSON file",
-                "",
-                "MyJSON.json",
-                "json");
-            if (!string.IsNullOrEmpty(path))
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+            saveFileDialog.FilterIndex = 1;
+            saveFileDialog.RestoreDirectory = true;
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 // Save the JSON to the chosen file
-                File.WriteAllText(path, json);
+                File.WriteAllText(saveFileDialog.FileName, json);
             }
         }
         else

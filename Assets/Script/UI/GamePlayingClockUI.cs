@@ -13,12 +13,13 @@ public class GamePlayingClockUI : MonoBehaviour {
     private void Update() {
         timerImage.fillAmount = GameplayPathMemManager.Instance.GetGamePlayingTimerNormalized();
         playTimeText.text = Mathf.CeilToInt(GameplayPathMemManager.Instance.GetGamePlayingTimer()) + "";
+        
         if (timerImage.fillAmount is < .5f and >= .25f) {
-            // Half of the time passed
+            // 50% of the time passed
             timerImage.GetComponent<Image>().color = new Color32(255, 178, 90, 255);
             playTimeText.color = new Color32(255, 178, 90, 255);
         } else if (timerImage.fillAmount is < .25f) {
-            // 3/4 of the time passed
+            // 75% of the time passed
             timerImage.GetComponent<Image>().color = new Color32(255, 92, 90, 255);
             playTimeText.color = new Color32(255, 92, 90, 255);
         } else {

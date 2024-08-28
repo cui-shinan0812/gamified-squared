@@ -27,14 +27,12 @@ public class GameStartCountdownUI : MonoBehaviour {
         if (GameplayPathMemManager.Instance.IsCountdownToStartActive()) {
             Show();
         } else {
-            // animator.ResetTrigger(NUMBER_POPUP);
             Hide();
         }
     }
 
     private void Update() {
-        // ToString("#") or ToString("N0") to format the output text to integer
-        // Mathf.Ceil() returns the smallest number that greater or equal to the input float number, better for countdown
+        
         int countdownNumber = Mathf.CeilToInt(GameplayPathMemManager.Instance.GetCountdownToStartTimer());
         countdownText.text = countdownNumber.ToString();
 
@@ -42,9 +40,9 @@ public class GameStartCountdownUI : MonoBehaviour {
             previousCountdownNumber = countdownNumber;
             if (GameplayPathMemManager.Instance.IsCountdownToStartActive())
             {
+                // Trigger the animation when the game is under Count Down State
                 animator.SetTrigger(NUMBER_POPUP);
             }
-            // SoundManager.Instance.PlayCountdownSound();
         }
     }
 

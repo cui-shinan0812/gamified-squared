@@ -23,8 +23,6 @@ public class JsonManager : MonoBehaviour
 
     public class Config
     {
-        public List<List<List<int>>> map { get; set; }
-
         public string M { get; set; }
         public string N { get; set; }
         public string NumOfPorts { get; set; }

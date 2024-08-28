@@ -10,7 +10,9 @@ public class DllManager : MonoBehaviour
     public static DllManager Instance { get; private set; }
     [DllImport("libUnityPlugIn")]
     private static extern void displayFrameUnity(IntPtr frame);
-
+    // Define the signature of the function in the C++ DLL
+    [DllImport("libUnityPlugIn", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr getSensors(IntPtr hardwareMatrix);
     private void Start()
     {
         Instance = this;

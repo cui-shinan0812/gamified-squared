@@ -17,12 +17,12 @@ public class ScenesManager : MonoBehaviour
     public void LoadMaps(){
         SceneManager.LoadScene("Maps");
     }
-    public void LoadFloor(){
-        SceneManager.LoadScene("Floor");
+    public void GameplayPathMem(){
+        SceneManager.LoadScene("GameplayPathMem");
     }
-    public void LoadSettings(){
-        SceneManager.LoadScene("Settings");
-    }
+    // public void LoadSettings(){
+    //     SceneManager.LoadScene("Settings");
+    // }
     public void LoadAbout(){
         SceneManager.LoadScene("About");
     }

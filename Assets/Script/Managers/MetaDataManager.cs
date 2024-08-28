@@ -45,7 +45,8 @@ public class MetaDataManager : MonoBehaviour
         category = null;
         difficulty = 0;
         // Open file browser
-        string path = EditorUtility.OpenFilePanel("Select JSON file", "", "json");
+        // string path = EditorUtility.OpenFilePanel("Select JSON file", "", "json");
+        string path = "Assets\\Resources\\output.json";
         if (path.Length != 0)
         {
             // Read the JSON file

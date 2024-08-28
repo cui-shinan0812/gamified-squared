@@ -14,10 +14,21 @@ public class GameplayPathMemManager : MonoBehaviour
 {
     public static GameplayPathMemManager Instance { get; private set; }
     
+    // original answer array, 1 frame contain 1 correct grid only. The frame index play as the sequence of path
     private int[][][] answerMap;
+    
+    // the array for displaying answer. Should only be called under Count Down State.
+    // Combine the answers from answerMap frame by frame to display a complete path
     private int[][] answerMapForDisplay;
+    
+    // for displaying the grid players stepped when the game is under Gameplay state
     private int[][] playerViewMap;
+    
+    // recording which grids player stepped at the frame and assist judging if player stepped correct grid
+    // work with answerMap and playerViewMap
     private bool[][] steppedMap;
+    
+    // to contain the color change timer of each grid
     private VirtualLedGridSO[][] colorChangeControlMap;
     public int stepCorrectCount { get; private set; }
     private int gameTotalScore;
@@ -26,7 +37,10 @@ public class GameplayPathMemManager : MonoBehaviour
     private int previousStepY;
     private int previousStepX;
     
+    // store events that will be triggered when STATE changing 
     public event EventHandler OnStateChanged;
+    
+    // store events that will be triggered when SCORE changing
     public event EventHandler OnScoreChanged;
 
     private enum State
@@ -124,7 +138,7 @@ public class GameplayPathMemManager : MonoBehaviour
                     {
                         for (int x = 0; x < playerViewMap[0].Length; x++)
                         {
-                            playerViewMap[y][x] = 1;
+                            playerViewMap[y][x] = ConvertToColorCode(EnumColor.RED);
                         }
                     }
                     DllManager.Instance.DisplayFrame(playerViewMap, m, n);
@@ -135,7 +149,7 @@ public class GameplayPathMemManager : MonoBehaviour
                     {
                         for (int x = 0; x < playerViewMap[0].Length; x++)
                         {
-                            playerViewMap[y][x] = 2;
+                            playerViewMap[y][x] = ConvertToColorCode(EnumColor.BLUE);
                         }
                     }
                     DllManager.Instance.DisplayFrame(playerViewMap, m, n);
@@ -146,7 +160,7 @@ public class GameplayPathMemManager : MonoBehaviour
                     {
                         for (int x = 0; x < playerViewMap[0].Length; x++)
                         {
-                            playerViewMap[y][x] = 0;
+                            playerViewMap[y][x] = ConvertToColorCode(EnumColor.GREEN);
                         }
                     }
                     DllManager.Instance.DisplayFrame(playerViewMap, m, n);
@@ -160,7 +174,7 @@ public class GameplayPathMemManager : MonoBehaviour
                 {
                     previousCountdownNumber = countdownNumber;
                     Debug.Log("[System] Counter Down:" + countdownNumber);
-                    theFrameToDisplay = -(countdownNumber - (int)countdownToStartTimerMax);
+                    theFrameToDisplay = -(countdownNumber - (int)countdownToStartTimerMax); 
                     if (theFrameToDisplay < answerMap.Length)
                     {
                         for (int y = 0; y < answerMap[theFrameToDisplay].Length; y++)
@@ -169,13 +183,13 @@ public class GameplayPathMemManager : MonoBehaviour
                             {
                                 if (ConvertToGameplayManagerViewPixel(answerMap[theFrameToDisplay][y][x]) == EnumColor.BLUE)
                                 {
-                                    answerMapForDisplay[y][x] = 2;
+                                    answerMapForDisplay[y][x] = ConvertToColorCode(EnumColor.BLUE);
                                     break;
                                 }
                             }
                         }
-                        DisplayAnswerViewMap(answerMap[theFrameToDisplay]);
-                        DllManager.Instance.DisplayFrame(answerMap[theFrameToDisplay], m, n);
+                        DisplayAnswerViewMap(answerMapForDisplay);
+                        DllManager.Instance.DisplayFrame(answerMapForDisplay, m, n);
                     }
                 }
 
@@ -301,7 +315,8 @@ public class GameplayPathMemManager : MonoBehaviour
         {
             for (int x = 0; x < playerViewMap[0].Length; x++)
             {
-                if (steppedMap[y][x] && playerViewMap[y][x] != 2)
+                // ignore grids that are stepped correctly
+                if (steppedMap[y][x] && playerViewMap[y][x] != ConvertToColorCode(EnumColor.BLUE))
                 {
                     previousStepY = y;
                     previousStepX = x;
@@ -313,7 +328,7 @@ public class GameplayPathMemManager : MonoBehaviour
                         case EnumColor.BLUE:
                             stepCorrectCount += 1;
                             OnScoreChanged?.Invoke(this, EventArgs.Empty);
-                            playerViewMap[y][x] = 2;
+                            playerViewMap[y][x] = ConvertToColorCode(EnumColor.BLUE); // turns blue
                             Debug.Log("[System] Correct Tile!");
                             Debug.Log("[System] previousGameplayTimeNumber: "+ $"{gamePlayingTimer:0.0}");
                             Debug.Log("[System] 1 second is added!");
@@ -327,7 +342,7 @@ public class GameplayPathMemManager : MonoBehaviour
                             if (ConvertToGameplayManagerViewPixel(playerViewMap[y][x]) == EnumColor.YELLOW || 
                                 ConvertToGameplayManagerViewPixel(playerViewMap[y][x]) == EnumColor.OFF)
                             {
-                                playerViewMap[y][x] = 1;
+                                playerViewMap[y][x] = ConvertToColorCode(EnumColor.RED); // turns red
                                 colorChangeControlMap[y][x].InitObject();
                                 Debug.Log("[System] Wrong Tile!");
                                 Debug.Log("[System] previousGameplayTimeNumber: "+ $"{gamePlayingTimer:0.0}");
@@ -419,6 +434,24 @@ public class GameplayPathMemManager : MonoBehaviour
                 return EnumColor.OFF;
         }
     }
+    
+    private int ConvertToColorCode(EnumColor enumColor)
+    {
+        switch (enumColor)
+        {
+            case EnumColor.GREEN:
+                return 0;
+            case EnumColor.RED:
+                return 1;
+            case EnumColor.BLUE:
+                return 2;
+            case EnumColor.YELLOW:
+                return 3;
+            case EnumColor.OFF:
+            default:
+                return 4;
+        }
+    }
 
     // Wrong stepping behaviour control
     private void ColorChangeTimeControl()
@@ -431,7 +464,7 @@ public class GameplayPathMemManager : MonoBehaviour
 
                 if ( ConvertToGameplayManagerViewPixel(playerViewMap[y][x]) == EnumColor.RED && colorChangeControlMap[y][x].GetRedToYellowCountDownTime() < 0)
                 {
-                    playerViewMap[y][x] = 3;
+                    playerViewMap[y][x] = ConvertToColorCode(EnumColor.YELLOW);
                 }
             }
         }
@@ -466,8 +499,7 @@ public class GameplayPathMemManager : MonoBehaviour
             playerViewMap[y] = new int[answerMap[0][0].Length];
             for (int x = 0; x < playerViewMap[0].Length; x++)
             {
-                playerViewMap[y][x] = 4;
-                // 4 means off, no light
+                playerViewMap[y][x] = ConvertToColorCode(EnumColor.OFF);
             }
         }
     }
@@ -480,8 +512,7 @@ public class GameplayPathMemManager : MonoBehaviour
             answerMapForDisplay[y] = new int[answerMap[0][0].Length];
             for (int x = 0; x < answerMapForDisplay[0].Length; x++)
             {
-                answerMapForDisplay[y][x] = 4;
-                // 4 means off, no light
+                answerMapForDisplay[y][x] = ConvertToColorCode(EnumColor.OFF);
             }
         }
     }

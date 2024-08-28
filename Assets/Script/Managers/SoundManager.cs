@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
+// SoundManager is responsible to the volume control of any sfx. Only button clicking sfx for this project
 public class SoundManager : MonoBehaviour {
 
     private const string PLAYER_PREFS_SOUND_EFFECTS_VOLUME = "SoundEffectsVolume";

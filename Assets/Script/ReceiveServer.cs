@@ -7,24 +7,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 public class ReceiveServer : MonoBehaviour
 {
-    public bool isDisplayFrame;
     public static ReceiveServer Instance;
-    private int M = 4;
-    private int N = 4;
     private int numOfPorts = 4;
     private int maxLength = 4;
-    private int[] portsDistribution;
-    private int[] breakpointsLength;
-    private string[,] distribution = new string[4, 4]
-    {
-        { "A0", "B0", "C0", "D0" },
-        { "A1", "B1", "C1", "D1" },
-        { "A2", "B2", "C2", "C5" },
-        { "A3", "A4", "C3", "C4" }
-    };
     private int port = 8200;
     private UdpClient server;
-    private string message;
     
     // Define the signature of the function in the C++ DLL
     [DllImport("libUnityPlugIn", CallingConvention = CallingConvention.Cdecl)]
@@ -34,28 +21,12 @@ public class ReceiveServer : MonoBehaviour
 
     void Start()
     {
-        message = "";
         Instance = this;
-        isDisplayFrame = false;
-        portsDistribution = new int[1] { numOfPorts };
-        breakpointsLength = new int[1] { numOfPorts };
         
         // Create the UDP server
         server = new UdpClient(port);
         server.BeginReceive(ReceiveCallback, server);
         Debug.Log("Server started on port: " + port);
-    }
-
-    private void Update()
-    {
-        if (!message.Equals(""))
-        {
-            // bool[][] hardwareMatrix = ReceiveServer.PassMessageToCpp(message);
-            // Debug.Log("----------------\n");
-            // DisplayAnswerViewMap(hardwareMatrix);
-            // Debug.Log("----------------\n");
-            // message = "";
-        }
     }
 
     void ReceiveCallback(IAsyncResult result)
@@ -65,32 +36,12 @@ public class ReceiveServer : MonoBehaviour
         byte[] data = server.EndReceive(result, ref clientEndPoint);
 
         ConvertTo2DBoolAry(data);
-        
-        // Convert byte array to hexadecimal string
-        StringBuilder hex = new StringBuilder(data.Length * 2);
-        foreach (byte b in data)
-            hex.AppendFormat("{0:x2}", b);
-        string message = hex.ToString();
 
         // Debug.Log("Received message: " + message);
 
         // Start listening for the next message
         server.BeginReceive(ReceiveCallback, server);
-
-        // Convert byte array to hexadecimal string
-        // StringBuilder hex = new StringBuilder(data.Length * 2);
-        // foreach (byte b in data)
-        //     hex.AppendFormat("{0:x2}", b);
-        // message = hex.ToString(); // Replace this with the actual message
-        // // Debug.Log("HI1");
-        // bool[][] hardwareMatrix = PassMessageToCpp(message);
-        // Debug.Log("----------------\n");
-        // DisplayAnswerViewMap(hardwareMatrix);
-        // Debug.Log("----------------\n");
-        // message = "";
-        // // Debug.Log("Received message: " + message);
-        // // Start listening for the next message
-        // server.BeginReceive(ReceiveCallback, server);
+        
     }
     
     public static bool[][] PassMessageToCpp(string message)

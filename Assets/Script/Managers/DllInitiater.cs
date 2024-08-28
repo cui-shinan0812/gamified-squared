@@ -7,6 +7,12 @@ using UnityEngine;
 // DllInitiater is used to trigger the init() function in the dll, which is responsible to send the config data to the hardware
 public class DllInitiater : MonoBehaviour
 {
+    public const string HEIGHT = "Height";
+    public const string WIDTH = "Width";
+    public const string NUM_OF_PORTS = "NumOfPorts";
+    public const string MAX_LENGTH = "MaxLength";
+    public const string CONTROLLER_USED = "ControllerUsed";
+    
     [DllImport("libUnityPlugIn")]
     private static extern void init(int m, int n, int numPorts, int length, int controller_used, int[] portsDistribution, IntPtr configMap);
 
@@ -46,6 +52,11 @@ public class DllInitiater : MonoBehaviour
         IntPtr configMapPtr = Marshal.UnsafeAddrOfPinnedArrayElement(configMap, 0);
         // Call the init function
         init(M, N, NumOfPorts, MaxLength, ControllerUsed, PortsDistribution, configMapPtr);
+        PlayerPrefs.SetInt(HEIGHT, M);
+        PlayerPrefs.SetInt(WIDTH, N);
+        PlayerPrefs.SetInt(NUM_OF_PORTS, NumOfPorts);
+        PlayerPrefs.SetInt(MAX_LENGTH, MaxLength);
+        PlayerPrefs.SetInt(CONTROLLER_USED, ControllerUsed);
         // Free the allocated memory
         for (int i = 0; i < M; ++i)
         {

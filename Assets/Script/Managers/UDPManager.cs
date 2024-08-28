@@ -7,28 +7,22 @@ using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 
+// UDPManager is responsible to receive and further process the received data from UDP message.
 public class UDPManager : MonoBehaviour
 {
     public bool isDisplayFrame;
     public static UDPManager Instance { private set; get; }
-    private int M = 4;
-    private int N = 4;
-    private int numOfPorts = 4;
-    private int maxLength = 6;
+    private int numOfPorts;
+    private int maxLength;
     private int port = 8200;
+    private int maxPossibleLedConnectEachController = 170;
     private UdpClient server;
-    private string message;
     private bool[][] tempStepMap;
     
-    // Define the signature of the function in the C++ DLL
-    [DllImport("libUnityPlugIn", CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr ReceiveMessageFromUnity(string message);
-    [DllImport("libUnityPlugIn")]
-    private static extern IntPtr getSensors(IntPtr hardwareMatrix);
-
     void Start()
     {
-        message = "";
+        numOfPorts = PlayerPrefs.GetInt(DllInitiater.NUM_OF_PORTS);
+        maxLength = PlayerPrefs.GetInt(DllInitiater.MAX_LENGTH);
         Instance = this;
         isDisplayFrame = false;
         
@@ -46,53 +40,17 @@ public class UDPManager : MonoBehaviour
 
         ConvertTo2DBoolAry(data);
         
+        // Debug code
         // Convert byte array to hexadecimal string
-        StringBuilder hex = new StringBuilder(data.Length * 2);
-        foreach (byte b in data)
-            hex.AppendFormat("{0:x2}", b);
-        string message = hex.ToString();
+        // StringBuilder hex = new StringBuilder(data.Length * 2);
+        // foreach (byte b in data)
+        //     hex.AppendFormat("{0:x2}", b);
+        // string message = hex.ToString();
 
         // Debug.Log("Received message: " + message);
 
         // Start listening for the next message
         server.BeginReceive(ReceiveCallback, server);
-    }
-    
-    public static bool[][] PassMessageToCpp(string message)
-    {
-        int sRows = 4;
-        int sCols = 4;
-        IntPtr ptr = ReceiveMessageFromUnity(message);
-        int[][] arr = new int[sRows][];
-
-        // Marshal the array of pointers (which point to the arrays of bools)
-        IntPtr[] ptrArray = new IntPtr[sRows];
-        Marshal.Copy(ptr, ptrArray, 0, sRows);
-
-        for (int i = 0; i < sRows; i++)
-        {
-            arr[i] = new int[sCols];
-            // Now copy the bool values for each row
-            IntPtr rowPtr = ptrArray[i];
-            byte[] boolBytes = new byte[sCols];
-            Marshal.Copy(rowPtr, boolBytes, 0, sCols);
-
-            for (int j = 0; j < sCols; j++)
-            {
-                arr[i][j] = boolBytes[j];
-                // Debug.Log("arr["+ i +"]["+j+"]: " + arr[i][j]);
-            }
-        }
-        bool[][] hardwareMatrix = new bool[4][];
-        for (int i = 0; i < hardwareMatrix.Length; i++)
-        {
-            hardwareMatrix[i] = new bool[4];
-            for (int j = 0; j < hardwareMatrix[0].Length; j++)
-            {
-                hardwareMatrix[i][j] = arr[i][j] != 0;
-            }
-        }
-        return hardwareMatrix;
     }
 
     void OnDestroy()
@@ -103,11 +61,11 @@ public class UDPManager : MonoBehaviour
     
     private void ConvertTo2DBoolAry(byte[] data)
     {
-        int maxCols = numOfPorts; // 4
+        int maxCols = numOfPorts;
         Debug.Log("[UDPManager] maxCols: " + maxCols);
-        int maxRows = maxLength; // 6 
+        int maxRows = maxLength; 
         Debug.Log("[UDPManager] maxRows: " + maxRows);
-        int numOfControllersUsed = 1;
+        int numOfControllersUsed = PlayerPrefs.GetInt(DllInitiater.CONTROLLER_USED);
         bool[][] receivedData = new bool[maxCols][];
         for (int i = 0; i < maxCols; i++)
         {
@@ -133,41 +91,37 @@ public class UDPManager : MonoBehaviour
                     msg += j+ ", ";
                 }
             }
-
-            
-            
             
             Debug.Log("[UDPManager] receivedMessage: \n"+msg);
-            
             Debug.Log("[UDPManager] receivedData.Length: "+ receivedData.Length);
             Debug.Log("[UDPManager] receivedData[0].Length: "+ receivedData[0].Length);
-
+            
             for (int x = 0; x < receivedData[0].Length; x++)
             {
                 for (int y = 0; y < receivedData.Length; y++)
                 {
-                    int receivedMessageNo = y * 170 + (x+y);
+                    int receivedMessageNo = y * maxPossibleLedConnectEachController + (x+y);
                     if (receivedMessage[receivedMessageNo] == 0xab)
                     {
-                        receivedData[y][x + 4 * receiverNo] = true;
+                        receivedData[y][x + PlayerPrefs.GetInt(DllInitiater.NUM_OF_PORTS) * receiverNo] = true;
                     }
                     else
                     {
-                        receivedData[y][x + 4 * receiverNo] = false;
+                        receivedData[y][x + PlayerPrefs.GetInt(DllInitiater.NUM_OF_PORTS) * receiverNo] = false;
                     }
                 }
             }
         }
         
-        bool[][] testReceivedData = new bool[4][];
-        for (int i = 0; i < 4; i++)
-        {
-            testReceivedData[i] = new bool[6];
-            for (int j = 0; j < testReceivedData[0].Length; j++)
-            {
-                testReceivedData[i][j] = true;
-            }
-        }
+        // bool[][] testReceivedData = new bool[4][];
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     testReceivedData[i] = new bool[6];
+        //     for (int j = 0; j < testReceivedData[0].Length; j++)
+        //     {
+        //         testReceivedData[i][j] = true;
+        //     }
+        // }
 
         bool[][] reversedData = ReverseRowsAndCols(receivedData);
 
@@ -249,8 +203,11 @@ public class UDPManager : MonoBehaviour
         IntPtr framePtr = Marshal.AllocHGlobal(m * IntPtr.Size);
         Marshal.Copy(rows, 0, framePtr, m);
 
+        int h = PlayerPrefs.GetInt(DllInitiater.HEIGHT);
+        int w = PlayerPrefs.GetInt(DllInitiater.WIDTH);
+        
         // Call the C++ function
-        GetSensors(framePtr, 4, 4);
+        GetSensors(framePtr, h, w);
     
         // Free the unmanaged memory
         for (int i = 0; i < m; ++i)
@@ -264,7 +221,7 @@ public class UDPManager : MonoBehaviour
     private void GetSensors(IntPtr framePtr, int sRows, int sCols)
     {
         // Call the C++ function and get the pointer to the bool array
-        IntPtr arrPtr = getSensors(framePtr);
+        IntPtr arrPtr = DllManager.getSensors(framePtr);
         bool[][] arr = new bool[sRows][];
 
         // Marshal the array of pointers (which point to the arrays of bools)
@@ -289,35 +246,6 @@ public class UDPManager : MonoBehaviour
         Debug.Log("[UDPManager] arr---------------------");
         DisplayAnswerViewMap(arr);
         Debug.Log("[UDPManager] arr---------------------");
-    }
-    
-    private void DisplayTestArray(int[][] targetArray)
-    {
-        string testDisplayMap;
-
-        if (targetArray.Length > 0)
-        {
-            for (int y = 0; y < targetArray.Length; y++)
-            {
-                testDisplayMap = "[UDPManager] ";
-                testDisplayMap += "[";
-                for (int x = 0; x < targetArray[0].Length; x++)
-                {
-                    testDisplayMap += " " + targetArray[y][x];
-                }
-
-                if (y < targetArray.Length - 1)
-                {
-                    testDisplayMap += " ], \n";
-                }
-                else
-                {
-                    testDisplayMap += " ] \n";
-                }
-                Debug.Log(testDisplayMap);
-            }
-
-        }
     }
 
     public bool[][] GetTempStepMap()
