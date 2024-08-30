@@ -46,6 +46,29 @@ public static extern IntPtr getSensors(IntPtr hardwareMatrix);
 
 <hr>
 
+### Use of Config
+
+Some data from the config file is stored in the **Player Prefernce** when every time **DllInitiater** runs Start() to allow them being access across scene.
+
+```CS
+// Usage
+// Set in DllInitiater
+PlayerPrefs.SetInt(HEIGHT, M);
+PlayerPrefs.SetInt(WIDTH, N);
+PlayerPrefs.SetInt(NUM_OF_PORTS, NumOfPorts);
+PlayerPrefs.SetInt(MAX_LENGTH, MaxLength);
+PlayerPrefs.SetInt(CONTROLLER_USED, ControllerUsed);
+
+//Get in other scripts
+M = PlayerPrefs.GetInt(DllInitiater.HEIGHT);
+N = PlayerPrefs.GetInt(DllInitiater.WIDTH);
+NumOfPorts = PlayerPrefs.GetInt(DllInitiater.NUM_OF_PORTS);
+MAX_LENGTH = PlayerPrefs.GetInt(DllInitiater.MAX_LENGTH);
+CONTROLLER_USED = PlayerPrefs.GetInt(DllInitiater.CONTROLLER_USED);
+```
+
+<hr>
+
 ## Game Structure
 This document will explain the project scene by scene.
 Essential Scenes for constructing the game are:
