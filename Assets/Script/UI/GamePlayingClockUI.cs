@@ -24,8 +24,8 @@ public class GamePlayingClockUI : MonoBehaviour {
             playTimeText.color = new Color32(255, 92, 90, 255);
         } else {
             // default color of time
-            timerImage.GetComponent<Image>().color = new Color32(219, 255, 90, 255);
-            playTimeText.color = new Color32(219, 255, 90, 255);
+            timerImage.GetComponent<Image>().color = new Color32(90, 149, 255, 255);
+            playTimeText.color = new Color32(90, 149, 255, 255);
         }
     }
 }
