@@ -28,5 +28,6 @@ public class ButtonUI : MonoBehaviour
     public void Clickonbutton()
     {
         send_controllight(targetIP, targetPort);
+        Debug.Log("Called");
     }
 }
